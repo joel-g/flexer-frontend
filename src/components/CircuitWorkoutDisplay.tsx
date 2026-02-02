@@ -13,17 +13,55 @@ interface WorkoutSet {
 type WorkoutState = 'exercise' | 'rest' | 'completed';
 
 export const CircuitWorkoutDisplay: React.FC = () => {
-  const { 
-    currentWorkout, 
-    progress, 
-    currentPlan, 
-    nextWorkout, 
-    previousWorkout, 
-    completeCurrentWorkout 
+  const {
+    currentWorkout,
+    progress,
+    currentPlan,
+    loading,
+    error,
+    nextWorkout,
+    previousWorkout,
+    completeCurrentWorkout
   } = useWorkout();
 
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
   const [workoutState, setWorkoutState] = useState<WorkoutState>('exercise');
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="spinner"></div>
+        <p>Loading your workout...</p>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="error-screen">
+        <h2>Something went wrong</h2>
+        <p>{error}</p>
+        <button className="btn btn-primary" onClick={() => window.location.reload()}>
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  // No plan available
+  if (!currentPlan) {
+    return (
+      <div className="no-plan-screen">
+        <h2>No Workout Plan</h2>
+        <p>You don't have an active workout plan yet.</p>
+        <a href="/onboarding" className="btn btn-primary">
+          Create Your Plan
+        </a>
+      </div>
+    );
+  }
 
   // Generate flat array of all sets in circuit order
   const workoutSets = useMemo(() => {

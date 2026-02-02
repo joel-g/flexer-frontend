@@ -12,12 +12,12 @@ export const WorkoutDisplay: React.FC = () => {
     completeCurrentWorkout 
   } = useWorkout();
 
-  if (!currentWorkout) {
+  if (!currentWorkout || !currentPlan) {
     return (
       <div className="completion-screen">
         <h2>🎉 Congratulations!</h2>
         <p>You've completed all available workouts in your current plan.</p>
-        <button 
+        <button
           className="btn btn-primary"
           onClick={() => window.location.reload()}
         >

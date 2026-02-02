@@ -49,3 +49,53 @@ export interface WorkoutProgress {
     completedSets: SetProgress[];
   };
 }
+
+// ===== User Profile Types =====
+
+export interface UserProfile {
+  id: string | null;
+  userId: string;
+  age?: number;
+  gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
+  heightCm?: number;
+  weightKg?: number;
+  experienceLevel?: 'beginner' | 'intermediate' | 'advanced';
+  workoutFrequency?: number;
+  workoutDuration?: number;
+  fitnessGoals: string[];
+  injuries: string[];
+  injuryDetails?: string;
+  equipmentAvailable: string[];
+  equipmentDetails?: string;
+  preferredWorkoutTypes: string[];
+  customGoal?: string;
+}
+
+export interface ProfileUpdateRequest {
+  age?: number;
+  gender?: string;
+  heightCm?: number;
+  weightKg?: number;
+  experienceLevel?: string;
+  workoutFrequency?: number;
+  workoutDuration?: number;
+  fitnessGoals?: string[];
+  injuries?: string[];
+  injuryDetails?: string;
+  equipmentAvailable?: string[];
+  equipmentDetails?: string;
+  preferredWorkoutTypes?: string[];
+  customGoal?: string;
+}
+
+// ===== Plan Response Types =====
+
+export interface PlanResponse {
+  id: string;
+  name: string;
+  description: string;
+  durationWeeks: number;
+  isActive: boolean;
+  createdAt: string;
+  planData: WorkoutPlan;
+}
