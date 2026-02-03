@@ -758,6 +758,87 @@ body {
   font-size: 1rem;
 }
 
+/* ===== Landing Page ===== */
+.landing-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.landing-content {
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.landing-logo {
+  color: white;
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.landing-tagline {
+  color: rgba(255,255,255,0.9);
+  margin: 0 0 40px 0;
+  font-size: 1.1rem;
+}
+
+.landing-features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.landing-feature {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: white;
+  font-size: 1rem;
+}
+
+.feature-icon {
+  font-size: 1.25rem;
+}
+
+.landing-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.landing-buttons .btn {
+  width: 100%;
+  padding: 14px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.landing-buttons .btn:active {
+  transform: scale(0.98);
+}
+
+.landing-buttons .btn-primary {
+  background: white;
+  color: #667eea;
+}
+
+.landing-buttons .btn-secondary {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+
 .config-error {
   min-height: 100vh;
   display: flex;

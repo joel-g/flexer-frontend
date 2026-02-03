@@ -1,7 +1,6 @@
-import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { SignInPage } from './pages/SignInPage';
-import { SignUpPage } from './pages/SignUpPage';
+import { LandingPage } from './pages/LandingPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { WorkoutPage } from './pages/WorkoutPage';
@@ -19,7 +18,7 @@ function ProtectedRoute() {
         <Outlet />
       </SignedIn>
       <SignedOut>
-        <RedirectToSignIn />
+        <Navigate to="/" replace />
       </SignedOut>
     </>
   );
@@ -28,9 +27,17 @@ function ProtectedRoute() {
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public auth routes */}
-      <Route path="/sign-in/*" element={<SignInPage />} />
-      <Route path="/sign-up/*" element={<SignUpPage />} />
+      {/* Landing page for unauthenticated users */}
+      <Route path="/" element={
+        <>
+          <SignedIn>
+            <Navigate to="/dashboard" replace />
+          </SignedIn>
+          <SignedOut>
+            <LandingPage />
+          </SignedOut>
+        </>
+      } />
 
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
@@ -41,9 +48,8 @@ function AppRoutes() {
         <Route path="/profile" element={<ProfilePage />} />
       </Route>
 
-      {/* Default redirect */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      {/* Catch-all redirect */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
