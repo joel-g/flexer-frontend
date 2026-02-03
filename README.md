@@ -11,7 +11,7 @@ Currently, two official plugins are available:
 
 The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-# 💪 Flexin - Personal Workout App
+# 💪 Flexer - Personal Workout App
 
 A mobile-first React app designed to replace Volt Athletic functionality for personal use. Built with TypeScript and Vite for fast development and optimal performance.
 
@@ -36,7 +36,7 @@ A mobile-first React app designed to replace Volt Athletic functionality for per
 ```bash
 # Clone the repository
 git clone <your-repo-url>
-cd flexin
+cd flexer
 
 # Install dependencies
 npm install

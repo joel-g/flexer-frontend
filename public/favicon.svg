@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#667eea"/>
+      <stop offset="100%" stop-color="#764ba2"/>
+    </linearGradient>
+  </defs>
+  <!-- Left outer plate -->
+  <rect x="8" y="30" width="12" height="40" rx="3" fill="url(#grad)"/>
+  <!-- Left inner plate -->
+  <rect x="20" y="35" width="10" height="30" rx="2" fill="url(#grad)"/>
+  <!-- Bar -->
+  <rect x="30" y="45" width="40" height="10" rx="2" fill="url(#grad)"/>
+  <!-- Right inner plate -->
+  <rect x="70" y="35" width="10" height="30" rx="2" fill="url(#grad)"/>
+  <!-- Right outer plate -->
+  <rect x="80" y="30" width="12" height="40" rx="3" fill="url(#grad)"/>
+</svg>

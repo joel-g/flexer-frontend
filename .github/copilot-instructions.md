@@ -1,4 +1,4 @@
-# Flexin - Mobile Workout App
+# Flexer - Mobile Workout App
 
 - [x] Verify that the copilot-instructions.md file in the .github directory is created.
 
