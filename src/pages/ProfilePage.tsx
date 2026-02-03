@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useClerk } from '@clerk/clerk-react';
 import { useApi } from '../hooks/useApi';
 import type { UserProfile, ProfileUpdateRequest } from '../types/workout';
 
@@ -18,6 +19,7 @@ const EQUIPMENT_OPTIONS = [
 export function ProfilePage() {
   const api = useApi();
   const navigate = useNavigate();
+  const { signOut } = useClerk();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +72,7 @@ export function ProfilePage() {
     try {
       setLoading(true);
       const res = await api.get<UserProfile>('/profile');
+
       if (res.success && res.data) {
         setAge(res.data.age);
         setHeightCm(res.data.heightCm);
@@ -127,6 +130,11 @@ export function ProfilePage() {
     } else {
       setEquipment([...equipment, id]);
     }
+  }
+
+  async function handleSignOut() {
+    await signOut();
+    navigate('/sign-in');
   }
 
   if (loading) {
@@ -275,6 +283,13 @@ export function ProfilePage() {
         <p className="profile-note">
           Changes will be used when generating your next workout plan.
         </p>
+
+        <section className="profile-section account-section">
+          <h2>Account</h2>
+          <button onClick={handleSignOut} className="btn btn-secondary">
+            Sign Out
+          </button>
+        </section>
       </main>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
-import type { ProfileUpdateRequest } from '../types/workout';
+import type { ProfileUpdateRequest, UserProfile } from '../types/workout';
 
 // Onboarding data structure
 interface OnboardingData {
@@ -65,6 +65,40 @@ export function OnboardingPage() {
   const [jsonInput, setJsonInput] = useState('');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [importing, setImporting] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  // Load existing profile data on mount
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await api.get<UserProfile>('/profile');
+        if (res.success && res.data) {
+          const profile = res.data;
+          setData(prev => ({
+            ...prev,
+            age: profile.age,
+            gender: profile.gender,
+            heightCm: profile.heightCm,
+            weightKg: profile.weightKg,
+            fitnessGoals: profile.fitnessGoals || [],
+            experienceLevel: profile.experienceLevel,
+            workoutFrequency: profile.workoutFrequency,
+            workoutDuration: profile.workoutDuration,
+            injuries: profile.injuries || [],
+            injuryDetails: profile.injuryDetails,
+            equipmentAvailable: profile.equipmentAvailable || [],
+            equipmentDetails: profile.equipmentDetails,
+            customGoal: profile.customGoal,
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to load profile:', err);
+      } finally {
+        setProfileLoading(false);
+      }
+    }
+    loadProfile();
+  }, []);
 
   function updateData(updates: Partial<OnboardingData>) {
     setData(prev => ({ ...prev, ...updates }));
@@ -140,7 +174,7 @@ export function OnboardingPage() {
       try {
         planJson = JSON.parse(jsonInput);
       } catch {
-        setValidationErrors(['Invalid JSON. Make sure you copied the complete response from Claude.']);
+        setValidationErrors(['Invalid JSON. Make sure you copied the complete response from your AI.']);
         setImporting(false);
         return;
       }
@@ -173,6 +207,17 @@ export function OnboardingPage() {
     if (prompt) {
       await navigator.clipboard.writeText(prompt);
     }
+  }
+
+  if (profileLoading) {
+    return (
+      <div className="onboarding-page generating">
+        <div className="generating-content">
+          <div className="spinner"></div>
+          <h2>Loading...</h2>
+        </div>
+      </div>
+    );
   }
 
   if (importing) {
@@ -256,15 +301,21 @@ function DemographicsStep({ data, updateData }: StepProps) {
   const [useImperial, setUseImperial] = useState(true); // Default to imperial for US users
 
   // Local state for imperial inputs to avoid round-trip conversion issues
-  const [localFeet, setLocalFeet] = useState<string>(() =>
-    data.heightCm ? String(Math.floor(data.heightCm / 30.48)) : ''
-  );
-  const [localInches, setLocalInches] = useState<string>(() =>
-    data.heightCm ? String(Math.round((data.heightCm / 2.54) % 12)) : ''
-  );
-  const [localLbs, setLocalLbs] = useState<string>(() =>
-    data.weightKg ? String(Math.round(data.weightKg * 2.205)) : ''
-  );
+  const [localFeet, setLocalFeet] = useState<string>('');
+  const [localInches, setLocalInches] = useState<string>('');
+  const [localLbs, setLocalLbs] = useState<string>('');
+
+  // Initialize local imperial values from data (runs when data changes, e.g., after profile load)
+  useEffect(() => {
+    if (data.heightCm) {
+      const totalInches = data.heightCm / 2.54;
+      setLocalFeet(String(Math.floor(totalInches / 12)));
+      setLocalInches(String(Math.round(totalInches % 12)));
+    }
+    if (data.weightKg) {
+      setLocalLbs(String(Math.round(data.weightKg * 2.205)));
+    }
+  }, [data.heightCm, data.weightKg]);
 
   // Auto-save imperial values when they change (with slight delay to avoid interrupting typing)
   useEffect(() => {
@@ -758,7 +809,7 @@ function GeneratePlanStep({
       <div className="byoc-instructions">
         <h3>Generate Your Workout Plan</h3>
         <p>Follow these 3 simple steps to create your personalized plan:</p>
-        <p className="free-tier-note">Works with Claude's free plan - no subscription required!</p>
+        <p className="free-tier-note">Works with any AI assistant - no subscription required!</p>
 
         <div className="instruction-steps">
           <div className="instruction-step">
@@ -772,16 +823,23 @@ function GeneratePlanStep({
           <div className="instruction-step">
             <span className="step-number">2</span>
             <div>
-              <strong>Paste into Claude</strong>
+              <strong>Paste into your favorite AI</strong>
               <p>
-                Go to{' '}
+                Use{' '}
                 <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">
-                  claude.ai
+                  Claude
                 </a>
-                {' '}and paste the prompt.
+                ,{' '}
+                <a href="https://chat.openai.com" target="_blank" rel="noopener noreferrer">
+                  ChatGPT
+                </a>
+                , or{' '}
+                <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer">
+                  Gemini
+                </a>
               </p>
               <p className="warning-text">
-                Wait for Claude to finish typing (2-3 minutes). The response is large!
+                Wait for it to finish (2-3 minutes). The response is large!
               </p>
             </div>
           </div>
@@ -790,7 +848,7 @@ function GeneratePlanStep({
             <span className="step-number">3</span>
             <div>
               <strong>Paste the JSON response</strong>
-              <p>Copy Claude's entire response and paste it below</p>
+              <p>Copy the entire response and paste it below</p>
             </div>
           </div>
         </div>
@@ -813,11 +871,14 @@ function GeneratePlanStep({
       </div>
 
       <div className="json-section">
-        <label>Paste Claude's Response (JSON)</label>
+        <label>Paste Your AI's Response (JSON)</label>
+        <p className="json-section-note">
+          It can take 2-3 minutes to generate your plan. Make sure your AI has finished typing before copying!
+        </p>
         <textarea
           value={jsonInput}
           onChange={e => setJsonInput(e.target.value)}
-          placeholder='Paste the JSON response from Claude here...
+          placeholder='Paste the JSON response here...
 
 It should start with something like:
 {

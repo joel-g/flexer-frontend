@@ -13,8 +13,10 @@ interface WorkoutContextType {
   nextWorkout: () => void;
   previousWorkout: () => void;
   completeCurrentWorkout: () => void;
+  uncompleteWorkout: (workoutDayId: string) => void;
   resetProgress: () => void;
   refreshData: () => Promise<void>;
+  deletePlan: () => Promise<boolean>;
 }
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
@@ -200,6 +202,44 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
     syncProgressToApi(newProgress);
   };
 
+  const uncompleteWorkout = (workoutDayId: string) => {
+    setProgress(prev => {
+      const newProgress = {
+        ...prev,
+        completedWorkouts: prev.completedWorkouts.filter(id => id !== workoutDayId),
+      };
+      syncProgressToApi(newProgress);
+      return newProgress;
+    });
+  };
+
+  const deletePlan = async (): Promise<boolean> => {
+    if (!currentPlan) return false;
+
+    try {
+      // Find the plan ID - we need to fetch it since we only store planData
+      const plansRes = await api.get<{ plans: { id: string }[] }>('/plans?active=true');
+      if (!plansRes.success || !plansRes.data?.plans.length) {
+        return false;
+      }
+
+      const planId = plansRes.data.plans[0].id;
+      const deleteRes = await api.delete(`/plans/${planId}`);
+
+      if (deleteRes.success) {
+        // Clear local state
+        setCurrentPlan(null);
+        setProgress(DEFAULT_PROGRESS);
+        localStorage.removeItem('workout-progress');
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Failed to delete plan:', err);
+      return false;
+    }
+  };
+
   return (
     <WorkoutContext.Provider value={{
       currentPlan,
@@ -210,8 +250,10 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
       nextWorkout,
       previousWorkout,
       completeCurrentWorkout,
+      uncompleteWorkout,
       resetProgress,
       refreshData,
+      deletePlan,
     }}>
       {children}
     </WorkoutContext.Provider>

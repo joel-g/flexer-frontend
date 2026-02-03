@@ -10,6 +10,7 @@ export function PlanOverviewPage() {
   const [progress, setProgress] = useState<WorkoutProgress | null>(null);
   const [expandedWeek, setExpandedWeek] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -46,6 +47,53 @@ export function PlanOverviewPage() {
 
   function isCurrentWorkout(weekIndex: number, dayIndex: number): boolean {
     return progress?.currentWeek === weekIndex && progress?.currentDay === dayIndex;
+  }
+
+  async function restartWorkout(dayId: string) {
+    if (!progress) return;
+
+    const newCompletedWorkouts = progress.completedWorkouts.filter(id => id !== dayId);
+    const newProgress = { ...progress, completedWorkouts: newCompletedWorkouts };
+
+    // Update local state immediately
+    setProgress(newProgress);
+
+    // Sync to API
+    try {
+      await api.put('/progress', {
+        currentWeek: newProgress.currentWeek,
+        currentDay: newProgress.currentDay,
+        completedWorkouts: newCompletedWorkouts,
+      });
+    } catch (err) {
+      console.error('Failed to update progress:', err);
+      // Revert on error
+      setProgress(progress);
+    }
+  }
+
+  async function handleDeletePlan() {
+    if (!plan) return;
+    if (!confirm('Are you sure you want to delete your workout plan? This cannot be undone.')) {
+      return;
+    }
+
+    setDeleting(true);
+
+    try {
+      const deleteRes = await api.delete(`/plans/${plan.id}`);
+
+      if (!deleteRes.success) {
+        throw new Error('Failed to delete plan');
+      }
+
+      // Clear local storage
+      localStorage.removeItem('workout-progress');
+      navigate('/onboarding');
+    } catch (err) {
+      console.error('Failed to delete plan:', err);
+      setDeleting(false);
+    }
   }
 
   if (loading) {
@@ -105,7 +153,18 @@ export function PlanOverviewPage() {
                       <span className="exercise-count">{day.exercises.length} exercises</span>
                     </div>
                     <div className="day-status">
-                      {isWorkoutCompleted(day.id) && <span className="status-badge completed">✓</span>}
+                      {isWorkoutCompleted(day.id) && (
+                        <>
+                          <span className="status-badge completed">✓</span>
+                          <button
+                            onClick={() => restartWorkout(day.id)}
+                            className="btn btn-small btn-ghost"
+                            title="Mark as incomplete"
+                          >
+                            Restart
+                          </button>
+                        </>
+                      )}
                       {isCurrentWorkout(weekIndex, dayIndex) && !isWorkoutCompleted(day.id) && (
                         <button onClick={() => navigate('/workout')} className="btn btn-small">
                           Start
@@ -119,6 +178,18 @@ export function PlanOverviewPage() {
           </div>
         ))}
       </div>
+
+      <section className="plan-danger-zone">
+        <h3>Danger Zone</h3>
+        <p>Delete this plan and all progress to start fresh with a new plan.</p>
+        <button
+          onClick={handleDeletePlan}
+          className="btn btn-danger"
+          disabled={deleting}
+        >
+          {deleting ? 'Deleting...' : 'Delete Plan'}
+        </button>
+      </section>
     </div>
   );
 }
