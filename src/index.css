@@ -219,6 +219,194 @@ body {
   margin-bottom: 24px;
 }
 
+/* Share Card - for image generation */
+.share-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 32px 24px;
+  border-radius: 16px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.share-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  color: white;
+}
+
+.flexer-logo {
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 0.9rem;
+}
+
+.share-date {
+  font-size: 0.8rem;
+}
+
+.share-card h2 {
+  color: white;
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+}
+
+.share-card .workout-name {
+  color: white;
+  font-size: 1rem;
+  margin: 0 0 20px;
+}
+
+.share-stats {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  margin: 24px 0;
+}
+
+.share-card .stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.share-card .stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: white;
+}
+
+.share-card .stat-label {
+  font-size: 0.85rem;
+  color: white;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.share-card .share-tagline {
+  margin: 0 0 20px;
+  font-size: 0.9rem;
+  color: white;
+}
+
+/* Exercise list inside share card (for image export) */
+.share-exercise-list {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 4px;
+  text-align: left;
+}
+
+.share-exercise-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.share-exercise-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.share-exercise-item:first-child {
+  padding-top: 0;
+}
+
+.share-exercise-name {
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  flex: 1;
+  padding-right: 12px;
+}
+
+.share-exercise-detail {
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Workout Summary */
+.workout-summary {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  text-align: left;
+}
+
+.workout-summary h3 {
+  margin: 0 0 16px;
+  font-size: 1rem;
+  color: #2d3748;
+}
+
+.summary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.summary-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.summary-list li:last-child {
+  border-bottom: none;
+}
+
+.summary-list .exercise-name {
+  color: #2d3748;
+  font-size: 0.9rem;
+  flex: 1;
+  padding-right: 12px;
+}
+
+.summary-list .exercise-detail {
+  color: #667eea;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* Share Button */
+.btn-share {
+  width: 100%;
+  padding: 14px 20px;
+  background: #2d3748;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: background 0.2s;
+}
+
+.btn-share:hover {
+  background: #1a202c;
+}
+
+.btn-share:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+}
+
 /* Empty state */
 .empty-state {
   text-align: center;
@@ -665,6 +853,14 @@ body {
   font-size: 0.95rem;
 }
 
+.step-note,
+.section-note {
+  margin: -12px 0 16px;
+  color: #718096;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
 .onboarding-footer {
   padding: 20px;
   display: flex;
@@ -1048,6 +1244,78 @@ body {
 .no-plan p {
   margin: 0 0 24px;
   color: #718096;
+}
+
+/* ===== Profile Page ===== */
+.profile-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.profile-header h1 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #2d3748;
+}
+
+.profile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.profile-section h2 {
+  margin: 0 0 20px;
+  font-size: 1.1rem;
+  color: #2d3748;
+}
+
+.section-description {
+  margin: -12px 0 16px;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.profile-actions .btn {
+  flex: 1;
+}
+
+.profile-note {
+  text-align: center;
+  color: #718096;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.success-banner {
+  background: #c6f6d5;
+  color: #22543d;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-align: center;
 }
 
 /* ===== Plan Overview ===== */

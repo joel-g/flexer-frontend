@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
+import html2canvas from 'html2canvas';
 import { useWorkout } from '../context/WorkoutContext';
 import { SetDisplay } from './SetDisplay';
 import { RestTimer } from './RestTimer';
@@ -26,6 +27,32 @@ export const CircuitWorkoutDisplay: React.FC = () => {
 
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
   const [workoutState, setWorkoutState] = useState<WorkoutState>('exercise');
+  const [isSharing, setIsSharing] = useState(false);
+  const shareCardRef = useRef<HTMLDivElement>(null);
+
+  // Generate flat array of all sets in circuit order
+  // NOTE: This must be before any early returns to satisfy React's rules of hooks
+  const workoutSets = useMemo(() => {
+    if (!currentWorkout) return [];
+
+    const sets: WorkoutSet[] = [];
+    const maxSets = Math.max(...currentWorkout.exercises.map(ex => ex.sets));
+
+    // Create sets in circuit order: Set 1 of all exercises, then Set 2 of all, etc.
+    for (let setNum = 1; setNum <= maxSets; setNum++) {
+      currentWorkout.exercises.forEach((exercise, exerciseIndex) => {
+        if (setNum <= exercise.sets) {
+          sets.push({
+            exercise,
+            setNumber: setNum,
+            exerciseIndex
+          });
+        }
+      });
+    }
+
+    return sets;
+  }, [currentWorkout]);
 
   // Show loading state
   if (loading) {
@@ -62,29 +89,6 @@ export const CircuitWorkoutDisplay: React.FC = () => {
       </div>
     );
   }
-
-  // Generate flat array of all sets in circuit order
-  const workoutSets = useMemo(() => {
-    if (!currentWorkout) return [];
-    
-    const sets: WorkoutSet[] = [];
-    const maxSets = Math.max(...currentWorkout.exercises.map(ex => ex.sets));
-    
-    // Create sets in circuit order: Set 1 of all exercises, then Set 2 of all, etc.
-    for (let setNum = 1; setNum <= maxSets; setNum++) {
-      currentWorkout.exercises.forEach((exercise, exerciseIndex) => {
-        if (setNum <= exercise.sets) {
-          sets.push({
-            exercise,
-            setNumber: setNum,
-            exerciseIndex
-          });
-        }
-      });
-    }
-    
-    return sets;
-  }, [currentWorkout]);
 
   const currentSet = workoutSets[currentSetIndex];
   const isLastSet = currentSetIndex >= workoutSets.length - 1;
@@ -144,34 +148,109 @@ export const CircuitWorkoutDisplay: React.FC = () => {
 
   const currentWeek = currentPlan.weeks[progress.currentWeek];
   const canGoPrevious = progress.currentWeek > 0 || progress.currentDay > 0;
-  const canGoNext = progress.currentWeek < currentPlan.weeks.length - 1 || 
+  const canGoNext = progress.currentWeek < currentPlan.weeks.length - 1 ||
                    progress.currentDay < currentWeek.days.length - 1;
+
+  const handleShare = async () => {
+    if (!shareCardRef.current) return;
+
+    setIsSharing(true);
+    try {
+      const canvas = await html2canvas(shareCardRef.current, {
+        backgroundColor: null,
+        scale: 2, // Higher resolution for better quality
+      });
+
+      const blob = await new Promise<Blob | null>(resolve =>
+        canvas.toBlob(resolve, 'image/png')
+      );
+
+      if (!blob) {
+        throw new Error('Failed to create image');
+      }
+
+      const file = new File([blob], 'flexer-workout.png', { type: 'image/png' });
+
+      // Try Web Share API first (works on mobile)
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Flexer Workout Complete',
+          text: `Just crushed ${currentWorkout?.name}! 💪`,
+        });
+      } else {
+        // Fallback: download the image
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'flexer-workout.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      // User cancelled or error occurred
+      console.error('Share failed:', err);
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   // Workout completed state
   if (workoutState === 'completed') {
     return (
       <div className="completion-screen">
-        <h2>🎉 Workout Complete!</h2>
-        <p>Great job finishing {currentWorkout.name}!</p>
-        <div className="completion-stats">
-          <div className="stat">
-            <span className="stat-value">{workoutSets.length}</span>
-            <span className="stat-label">Sets Completed</span>
+        {/* Share Card - this div gets rendered to image */}
+        <div ref={shareCardRef} className="share-card">
+          <div className="share-card-header">
+            <span className="flexer-logo">FLEXER</span>
+            <span className="share-date">{new Date().toLocaleDateString()}</span>
           </div>
-          <div className="stat">
-            <span className="stat-value">{currentWorkout.exercises.length}</span>
-            <span className="stat-label">Exercises</span>
+          <h2>Workout Complete!</h2>
+          <p className="workout-name">{currentWorkout.name}</p>
+          <div className="share-stats">
+            <div className="stat">
+              <span className="stat-value">{workoutSets.length}</span>
+              <span className="stat-label">Sets</span>
+            </div>
+            <div className="stat">
+              <span className="stat-value">{currentWorkout.exercises.length}</span>
+              <span className="stat-label">Exercises</span>
+            </div>
+          </div>
+          <p className="share-tagline">Week {progress.currentWeek + 1}, Day {progress.currentDay + 1}</p>
+
+          {/* Exercise list inside share card for image export */}
+          <div className="share-exercise-list">
+            {currentWorkout.exercises.map(ex => (
+              <div key={ex.id} className="share-exercise-item">
+                <span className="share-exercise-name">{ex.name}</span>
+                <span className="share-exercise-detail">{ex.sets} × {ex.reps}</span>
+              </div>
+            ))}
           </div>
         </div>
+
+        {/* Share Button */}
+        <button
+          onClick={handleShare}
+          className="btn btn-share"
+          disabled={isSharing}
+        >
+          {isSharing ? 'Creating image...' : 'Share Workout'}
+        </button>
+
+        {/* Navigation */}
         <div className="button-group">
-          <button 
+          <button
             className="btn btn-secondary"
             onClick={previousWorkout}
             disabled={!canGoPrevious}
           >
-            ← Previous Workout
+            ← Previous
           </button>
-          <button 
+          <button
             className="btn btn-primary"
             onClick={nextWorkout}
             disabled={!canGoNext}

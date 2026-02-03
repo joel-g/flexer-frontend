@@ -6,6 +6,7 @@ import { OnboardingPage } from './pages/OnboardingPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { WorkoutPage } from './pages/WorkoutPage';
 import { PlanOverviewPage } from './pages/PlanOverviewPage';
+import { ProfilePage } from './pages/ProfilePage';
 import './App.css';
 
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -37,6 +38,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/workout" element={<WorkoutPage />} />
         <Route path="/plan" element={<PlanOverviewPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Route>
 
       {/* Default redirect */}

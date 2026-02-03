@@ -585,7 +585,6 @@ function EquipmentStep({ data, updateData }: StepProps) {
     { id: 'resistance_bands', label: 'Resistance Bands' },
     { id: 'cardio_machines', label: 'Cardio Machines' },
     { id: 'full_gym', label: 'Full Gym Access' },
-    { id: 'bodyweight_only', label: 'Bodyweight Only' },
   ];
 
   function toggleEquipment(id: string) {
@@ -600,6 +599,7 @@ function EquipmentStep({ data, updateData }: StepProps) {
   return (
     <div className="step-content">
       <p className="step-instruction">What equipment do you have access to?</p>
+      <p className="step-note">No equipment? No problem! Leave empty for a bodyweight-only plan.</p>
       <div className="checkbox-grid">
         {equipment.map(eq => (
           <button

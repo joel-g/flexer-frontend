@@ -143,6 +143,9 @@ export function DashboardPage() {
         <button onClick={() => navigate('/plan')} className="btn btn-secondary">
           View Full Plan
         </button>
+        <button onClick={() => navigate('/profile')} className="btn btn-secondary">
+          Profile Settings
+        </button>
       </section>
     </div>
   );
