@@ -2277,3 +2277,509 @@ body {
 .privacy-section.highlight h2 {
   color: var(--color-primary);
 }
+
+/* ===== Responsive Layout ===== */
+.responsive-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.responsive-main {
+  flex: 1;
+}
+
+/* ===== Desktop Header ===== */
+.desktop-header {
+  display: none; /* Hidden on mobile by default */
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.desktop-header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.desktop-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  border: none;
+  cursor: pointer;
+}
+
+.desktop-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.desktop-nav-link {
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.desktop-nav-link:hover {
+  background: var(--color-bg-card-alt);
+  color: var(--color-text-primary);
+}
+
+.desktop-profile {
+  position: relative;
+}
+
+.profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--color-bg-card-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-trigger:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.profile-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: var(--color-text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.profile-label {
+  color: var(--color-text-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.profile-chevron {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  margin-left: 4px;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  animation: dropdownFade 0.15s ease-out;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-dropdown-header {
+  padding: 12px 16px;
+  background: var(--color-bg-card-alt);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.profile-email {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.profile-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.profile-dropdown-item:hover {
+  background: var(--color-bg-card-alt);
+}
+
+.profile-dropdown-signout {
+  color: var(--color-error);
+}
+
+.profile-dropdown-signout:hover {
+  background: var(--color-error-bg);
+}
+
+.profile-dropdown-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 4px 0;
+}
+
+.dropdown-icon {
+  font-size: 1rem;
+}
+
+/* ===== Desktop Media Queries ===== */
+@media screen and (min-width: 768px) {
+  /* Show desktop header */
+  .desktop-header {
+    display: block;
+  }
+
+  /* Landing page desktop styles */
+  .landing-page {
+    padding: 40px;
+  }
+
+  .landing-content {
+    max-width: 600px;
+  }
+
+  .landing-logo {
+    font-size: 4rem;
+  }
+
+  .landing-tagline {
+    font-size: 1.3rem;
+    margin-bottom: 48px;
+  }
+
+  .landing-features {
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+
+  .landing-feature {
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+  }
+
+  .landing-buttons {
+    flex-direction: row;
+    justify-content: center;
+    gap: 16px;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .landing-buttons .btn {
+    min-width: 160px;
+    flex: none;
+  }
+
+  /* Dashboard desktop styles */
+  .dashboard-page {
+    max-width: 800px;
+    padding: 32px;
+  }
+
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+
+  .dashboard-header h1 {
+    margin: 0;
+    font-size: 1.75rem;
+  }
+
+  .plan-summary {
+    padding: 32px;
+  }
+
+  .plan-stats {
+    gap: 32px;
+  }
+
+  .plan-stats .stat {
+    padding: 20px;
+  }
+
+  .plan-stats .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .next-workout {
+    padding: 32px;
+  }
+
+  .workout-preview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .workout-preview > div:first-child {
+    flex: 1;
+  }
+
+  .workout-preview .btn-large {
+    flex-shrink: 0;
+  }
+
+  .quick-actions {
+    gap: 16px;
+  }
+
+  /* Profile page desktop styles */
+  .profile-page {
+    max-width: 700px;
+    padding: 32px;
+  }
+
+  .profile-header {
+    margin-bottom: 32px;
+  }
+
+  .profile-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .profile-section {
+    padding: 32px;
+  }
+
+  .form-row {
+    gap: 24px;
+  }
+
+  .theme-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Plan overview desktop styles */
+  .plan-page {
+    max-width: 800px;
+    padding: 32px;
+  }
+
+  .plan-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .week-header {
+    padding: 20px 24px;
+  }
+
+  .week-days {
+    padding: 0 24px 24px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .day-card {
+    padding: 16px 20px;
+  }
+
+  /* Onboarding desktop styles */
+  .onboarding-content {
+    max-width: 600px;
+    padding: 32px;
+  }
+
+  .step-content {
+    padding: 32px;
+  }
+
+  .checkbox-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .onboarding-footer {
+    padding: 24px 32px;
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Privacy page desktop styles */
+  .privacy-page {
+    max-width: 800px;
+    padding: 32px;
+  }
+
+  .privacy-content {
+    padding: 48px;
+  }
+}
+
+/* Larger desktop screens */
+@media screen and (min-width: 1024px) {
+  .landing-content {
+    max-width: 700px;
+  }
+
+  .landing-features {
+    gap: 32px;
+  }
+
+  .dashboard-page {
+    max-width: 900px;
+  }
+
+  .plan-stats {
+    gap: 40px;
+  }
+
+  .week-days {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .checkbox-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .theme-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Extra large screens */
+@media screen and (min-width: 1280px) {
+  .desktop-header-content {
+    max-width: 1400px;
+    padding: 0 48px;
+  }
+
+  .dashboard-page,
+  .profile-page,
+  .plan-page,
+  .privacy-page {
+    max-width: 1000px;
+    padding: 40px;
+  }
+}
+
+/* ===== Workout Page Responsive Styles ===== */
+.workout-page {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+@media screen and (min-width: 768px) {
+  .workout-page {
+    max-width: 600px;
+    padding: 32px;
+  }
+
+  .workout-header {
+    padding: 24px;
+    margin: 0 0 24px;
+  }
+
+  .exercise-set-card {
+    padding: 32px;
+  }
+
+  .exercise-details-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .rest-timer {
+    padding: 40px 32px;
+  }
+
+  .rest-timer-display {
+    font-size: 4rem;
+  }
+
+  .completion-screen {
+    padding: 60px 40px;
+  }
+
+  .share-card {
+    padding: 40px 32px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .workout-page {
+    max-width: 700px;
+  }
+}
+
+/* ===== Onboarding Legal Footer ===== */
+.onboarding-legal-footer {
+  padding: 20px;
+  text-align: center;
+  background: var(--color-bg-card);
+  border-top: 1px solid var(--color-border);
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.onboarding-legal-footer .footer-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.onboarding-legal-footer .changelog-panel {
+  text-align: left;
+  max-width: 100%;
+}
+
+@media screen and (min-width: 768px) {
+  .onboarding-legal-footer {
+    max-width: 600px;
+    padding: 24px 32px;
+  }
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
+import { ResponsiveLayout } from '../components/ResponsiveLayout';
 import type { PlanResponse, WorkoutProgress, WorkoutWeek, WorkoutDay } from '../types/workout';
 
 export function PlanOverviewPage() {
@@ -97,30 +98,37 @@ export function PlanOverviewPage() {
   }
 
   if (loading) {
-    return <div className="plan-page loading">Loading...</div>;
+    return (
+      <ResponsiveLayout>
+        <div className="plan-page loading">Loading...</div>
+      </ResponsiveLayout>
+    );
   }
 
   if (!plan) {
     return (
-      <div className="plan-page">
-        <div className="no-plan">
-          <p>No active plan found.</p>
-          <button onClick={() => navigate('/onboarding')} className="btn btn-primary">
-            Create Plan
-          </button>
+      <ResponsiveLayout>
+        <div className="plan-page">
+          <div className="no-plan">
+            <p>No active plan found.</p>
+            <button onClick={() => navigate('/onboarding')} className="btn btn-primary">
+              Create Plan
+            </button>
+          </div>
         </div>
-      </div>
+      </ResponsiveLayout>
     );
   }
 
   return (
-    <div className="plan-page">
-      <header className="plan-header">
-        <button onClick={() => navigate('/dashboard')} className="back-btn">
-          ← Back
-        </button>
-        <h1>{plan.name}</h1>
-      </header>
+    <ResponsiveLayout>
+      <div className="plan-page">
+        <header className="plan-header">
+          <button onClick={() => navigate('/dashboard')} className="back-btn">
+            ← Back
+          </button>
+          <h1>{plan.name}</h1>
+        </header>
 
       <p className="plan-description">{plan.description}</p>
 
@@ -190,6 +198,7 @@ export function PlanOverviewPage() {
           {deleting ? 'Deleting...' : 'Delete Plan'}
         </button>
       </section>
-    </div>
+      </div>
+    </ResponsiveLayout>
   );
 }

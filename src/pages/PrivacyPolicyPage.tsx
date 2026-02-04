@@ -1,16 +1,18 @@
 import { useNavigate } from 'react-router-dom';
+import { ResponsiveLayout } from '../components/ResponsiveLayout';
 
 export function PrivacyPolicyPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="privacy-page">
-      <header className="privacy-header">
-        <button onClick={() => navigate(-1)} className="back-button">
-          ← Back
-        </button>
-        <h1>Privacy Policy</h1>
-      </header>
+    <ResponsiveLayout>
+      <div className="privacy-page">
+        <header className="privacy-header">
+          <button onClick={() => navigate(-1)} className="back-button">
+            ← Back
+          </button>
+          <h1>Privacy Policy</h1>
+        </header>
 
       <div className="privacy-content">
         <p className="last-updated">Last updated: February 2026</p>
@@ -87,6 +89,7 @@ export function PrivacyPolicyPage() {
         </section>
         
       </div>
-    </div>
+      </div>
+    </ResponsiveLayout>
   );
 }

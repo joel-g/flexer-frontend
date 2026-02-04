@@ -4,6 +4,7 @@ import { useClerk } from '@clerk/clerk-react';
 import { useApi } from '../hooks/useApi';
 import { useTheme } from '../context/ThemeContext';
 import { themes, themeIds } from '../data/themes';
+import { ResponsiveLayout } from '../components/ResponsiveLayout';
 import type { UserProfile, ProfileUpdateRequest } from '../types/workout';
 
 const EQUIPMENT_OPTIONS = [
@@ -142,20 +143,23 @@ export function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="profile-page">
-        <div className="loading-spinner">Loading...</div>
-      </div>
+      <ResponsiveLayout>
+        <div className="profile-page">
+          <div className="loading-spinner">Loading...</div>
+        </div>
+      </ResponsiveLayout>
     );
   }
 
   return (
-    <div className="profile-page">
-      <header className="profile-header">
-        <button onClick={() => navigate('/dashboard')} className="back-btn">
-          &larr; Back
-        </button>
-        <h1>Profile Settings</h1>
-      </header>
+    <ResponsiveLayout>
+      <div className="profile-page">
+        <header className="profile-header">
+          <button onClick={() => navigate('/dashboard')} className="back-btn">
+            &larr; Back
+          </button>
+          <h1>Profile Settings</h1>
+        </header>
 
       <main className="profile-content">
         {error && <div className="error-banner">{error}</div>}
@@ -329,6 +333,7 @@ export function ProfilePage() {
           </button>
         </section>
       </main>
-    </div>
+      </div>
+    </ResponsiveLayout>
   );
 }

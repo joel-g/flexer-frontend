@@ -6,6 +6,16 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: '0.5.0',
+    date: 'February 4, 2026',
+    changes: [
+      'Responsive desktop UI for signup and plan generation',
+      'Desktop header with profile menu and navigation',
+      'Privacy policy and changelog visible during onboarding',
+      'Improved layouts for larger screens',
+    ],
+  },
+  {
     version: '0.4.0',
     date: 'February 3, 2026',
     changes: [

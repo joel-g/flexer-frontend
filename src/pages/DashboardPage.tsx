@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import { changelog } from '../data/changelog';
+import { ResponsiveLayout } from '../components/ResponsiveLayout';
 import type { PlanResponse, WorkoutProgress, WorkoutDay } from '../types/workout';
 
 export function DashboardPage() {
@@ -62,31 +63,37 @@ export function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="dashboard-page">
-        <div className="loading-spinner">Loading...</div>
-      </div>
+      <ResponsiveLayout>
+        <div className="dashboard-page">
+          <div className="loading-spinner">Loading...</div>
+        </div>
+      </ResponsiveLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="dashboard-page">
-        <div className="error-message">{error}</div>
-      </div>
+      <ResponsiveLayout>
+        <div className="dashboard-page">
+          <div className="error-message">{error}</div>
+        </div>
+      </ResponsiveLayout>
     );
   }
 
   if (!plan) {
     return (
-      <div className="dashboard-page">
-        <div className="no-plan">
-          <h2>No Active Plan</h2>
-          <p>Complete onboarding to generate your personalized workout plan.</p>
-          <button onClick={() => navigate('/onboarding')} className="btn btn-primary">
-            Get Started
-          </button>
+      <ResponsiveLayout>
+        <div className="dashboard-page">
+          <div className="no-plan">
+            <h2>No Active Plan</h2>
+            <p>Complete onboarding to generate your personalized workout plan.</p>
+            <button onClick={() => navigate('/onboarding')} className="btn btn-primary">
+              Get Started
+            </button>
+          </div>
         </div>
-      </div>
+      </ResponsiveLayout>
     );
   }
 
@@ -94,10 +101,11 @@ export function DashboardPage() {
   const progressPct = getProgressPercentage();
 
   return (
-    <div className="dashboard-page">
-      <header className="dashboard-header">
-        <h1>Dashboard</h1>
-      </header>
+    <ResponsiveLayout>
+      <div className="dashboard-page">
+        <header className="dashboard-header">
+          <h1>Dashboard</h1>
+        </header>
 
       <section className="plan-summary">
         <h2>{plan.name}</h2>
@@ -197,6 +205,7 @@ export function DashboardPage() {
           Your personal information is securely stored and never shared with third parties.
         </p>
       </footer>
-    </div>
+      </div>
+    </ResponsiveLayout>
   );
 }

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
+import { ResponsiveLayout } from '../components/ResponsiveLayout';
+import { changelog } from '../data/changelog';
 import type { ProfileUpdateRequest, UserProfile } from '../types/workout';
 
 // Onboarding data structure
@@ -58,6 +60,7 @@ export function OnboardingPage() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<OnboardingData>(INITIAL_DATA);
   const [error, setError] = useState<string | null>(null);
+  const [changelogOpen, setChangelogOpen] = useState(false);
 
   // BYOC (Bring Your Own Claude) state
   const [prompt, setPrompt] = useState<string | null>(null);
@@ -211,38 +214,43 @@ export function OnboardingPage() {
 
   if (profileLoading) {
     return (
-      <div className="onboarding-page generating">
-        <div className="generating-content">
-          <div className="spinner"></div>
-          <h2>Loading...</h2>
+      <ResponsiveLayout>
+        <div className="onboarding-page generating">
+          <div className="generating-content">
+            <div className="spinner"></div>
+            <h2>Loading...</h2>
+          </div>
         </div>
-      </div>
+      </ResponsiveLayout>
     );
   }
 
   if (importing) {
     return (
-      <div className="onboarding-page generating">
-        <div className="generating-content">
-          <div className="spinner"></div>
-          <h2>Importing Your Plan</h2>
-          <p>Validating and saving your workout plan...</p>
+      <ResponsiveLayout>
+        <div className="onboarding-page generating">
+          <div className="generating-content">
+            <div className="spinner"></div>
+            <h2>Importing Your Plan</h2>
+            <p>Validating and saving your workout plan...</p>
+          </div>
         </div>
-      </div>
+      </ResponsiveLayout>
     );
   }
 
   return (
-    <div className="onboarding-page">
-      <header className="onboarding-header">
-        <h1>Flexer</h1>
-        <div className="progress-dots">
-          {STEPS.map((s, i) => (
-            <span key={s.id} className={`dot ${i === step ? 'active' : ''} ${i < step ? 'completed' : ''}`} />
-          ))}
-        </div>
-        <p className="step-title">{STEPS[step].title}</p>
-      </header>
+    <ResponsiveLayout>
+      <div className="onboarding-page">
+        <header className="onboarding-header">
+          <h1>Flexer</h1>
+          <div className="progress-dots">
+            {STEPS.map((s, i) => (
+              <span key={s.id} className={`dot ${i === step ? 'active' : ''} ${i < step ? 'completed' : ''}`} />
+            ))}
+          </div>
+          <p className="step-title">{STEPS[step].title}</p>
+        </header>
 
       <main className="onboarding-content">
         {error && <div className="error-banner">{error}</div>}
@@ -286,7 +294,56 @@ export function OnboardingPage() {
           </button>
         )}
       </footer>
-    </div>
+
+      <div className="onboarding-legal-footer">
+        <div className="footer-links">
+          <a 
+            href="/privacy" 
+            className="footer-link"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/privacy');
+            }}
+          >
+            Privacy Policy
+          </a>
+          <span className="footer-divider">•</span>
+          <button 
+            className="footer-link changelog-toggle"
+            onClick={() => setChangelogOpen(!changelogOpen)}
+          >
+            Changelog {changelogOpen ? '▲' : '▼'}
+          </button>
+        </div>
+        
+        {changelogOpen && (
+          <div className="changelog-panel">
+            <div className="changelog-header">
+              <span className="beta-badge">BETA</span>
+              <span>What's New</span>
+            </div>
+            {changelog.map((entry) => (
+              <div key={entry.version} className="changelog-entry">
+                <div className="changelog-version">
+                  <strong>v{entry.version}</strong>
+                  <span className="changelog-date">{entry.date}</span>
+                </div>
+                <ul className="changelog-changes">
+                  {entry.changes.map((change, i) => (
+                    <li key={i}>{change}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <p className="privacy-note">
+          Your personal information is securely stored and never shared with third parties.
+        </p>
+      </div>
+      </div>
+    </ResponsiveLayout>
   );
 }
 
