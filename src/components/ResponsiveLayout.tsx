@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { SignedIn } from '@clerk/clerk-react';
 import { DesktopHeader } from './DesktopHeader';
 
