@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { themes, type ThemeId, type Theme } from '../data/themes';
 
 interface ThemeContextType {
