@@ -1213,7 +1213,7 @@ body {
 /* Review Step */
 .review-section {
   padding: 16px 0;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .review-section:last-of-type {
@@ -1223,19 +1223,19 @@ body {
 .review-section h4 {
   margin: 0 0 8px;
   font-size: 0.85rem;
-  color: #718096;
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .review-section p {
   margin: 0;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .review-section .detail {
   font-style: italic;
-  color: #4a5568;
+  color: var(--color-text-secondary);
 }
 
 /* ===== Dashboard ===== */
