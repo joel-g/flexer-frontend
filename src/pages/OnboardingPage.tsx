@@ -371,12 +371,15 @@ function DemographicsStep({ data, updateData }: StepProps) {
       <div className="form-group">
         <label>Age</label>
         <input
-          type="number"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
           value={data.age || ''}
-          onChange={e => updateData({ age: parseInt(e.target.value) || undefined })}
+          onChange={e => {
+            const val = e.target.value.replace(/\D/g, '');
+            updateData({ age: val ? parseInt(val) : undefined });
+          }}
           placeholder="30"
-          min="13"
-          max="100"
         />
       </div>
 
@@ -417,25 +420,25 @@ function DemographicsStep({ data, updateData }: StepProps) {
             <div className="height-imperial">
               <div className="height-field">
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={localFeet}
-                  onChange={e => setLocalFeet(e.target.value)}
+                  onChange={e => setLocalFeet(e.target.value.replace(/\D/g, ''))}
                   onBlur={saveHeightImperial}
                   placeholder="5"
-                  min="3"
-                  max="8"
                 />
                 <span className="unit-label">ft</span>
               </div>
               <div className="height-field">
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={localInches}
-                  onChange={e => setLocalInches(e.target.value)}
+                  onChange={e => setLocalInches(e.target.value.replace(/\D/g, ''))}
                   onBlur={saveHeightImperial}
                   placeholder="10"
-                  min="0"
-                  max="11"
                 />
                 <span className="unit-label">in</span>
               </div>
@@ -444,13 +447,13 @@ function DemographicsStep({ data, updateData }: StepProps) {
           <div className="form-group">
             <label>Weight (lbs)</label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={localLbs}
-              onChange={e => setLocalLbs(e.target.value)}
+              onChange={e => setLocalLbs(e.target.value.replace(/\D/g, ''))}
               onBlur={saveWeightImperial}
               placeholder="160"
-              min="50"
-              max="500"
             />
           </div>
         </>
@@ -459,18 +462,28 @@ function DemographicsStep({ data, updateData }: StepProps) {
           <div className="form-group">
             <label>Height (cm)</label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={data.heightCm || ''}
-              onChange={e => updateData({ heightCm: parseInt(e.target.value) || undefined })}
+              onChange={e => {
+                const val = e.target.value.replace(/\D/g, '');
+                updateData({ heightCm: val ? parseInt(val) : undefined });
+              }}
               placeholder="175"
             />
           </div>
           <div className="form-group">
             <label>Weight (kg)</label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={data.weightKg || ''}
-              onChange={e => updateData({ weightKg: parseInt(e.target.value) || undefined })}
+              onChange={e => {
+                const val = e.target.value.replace(/\D/g, '');
+                updateData({ weightKg: val ? parseInt(val) : undefined });
+              }}
               placeholder="70"
             />
           </div>
