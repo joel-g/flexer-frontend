@@ -305,7 +305,7 @@ function DemographicsStep({ data, updateData }: StepProps) {
   const [localInches, setLocalInches] = useState<string>('');
   const [localLbs, setLocalLbs] = useState<string>('');
 
-  // Initialize local imperial values from data (runs when data changes, e.g., after profile load)
+  // Initialize local imperial values from data on mount only
   useEffect(() => {
     if (data.heightCm) {
       const totalInches = data.heightCm / 2.54;
@@ -315,32 +315,8 @@ function DemographicsStep({ data, updateData }: StepProps) {
     if (data.weightKg) {
       setLocalLbs(String(Math.round(data.weightKg * 2.205)));
     }
-  }, [data.heightCm, data.weightKg]);
-
-  // Auto-save imperial values when they change (with slight delay to avoid interrupting typing)
-  useEffect(() => {
-    if (!useImperial) return;
-    const feet = parseInt(localFeet) || 0;
-    const inches = parseInt(localInches) || 0;
-    if (feet > 0 || inches > 0) {
-      const totalInches = (feet * 12) + inches;
-      const cm = Math.round(totalInches * 2.54);
-      if (cm !== data.heightCm) {
-        updateData({ heightCm: cm });
-      }
-    }
-  }, [localFeet, localInches, useImperial]);
-
-  useEffect(() => {
-    if (!useImperial) return;
-    const lbs = parseInt(localLbs) || 0;
-    if (lbs > 0) {
-      const kg = Math.round(lbs / 2.205);
-      if (kg !== data.weightKg) {
-        updateData({ weightKg: kg });
-      }
-    }
-  }, [localLbs, useImperial]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount - don't overwrite user input
 
   // Convert and save height when inputs change (on blur or after typing)
   function saveHeightImperial() {
