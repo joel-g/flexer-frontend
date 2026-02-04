@@ -29,6 +29,9 @@ export function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [useImperial, setUseImperial] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   // Form state (metric values stored)
   const [age, setAge] = useState<number | undefined>();
@@ -139,6 +142,31 @@ export function ProfilePage() {
   async function handleSignOut() {
     await signOut();
     navigate('/sign-in');
+  }
+
+  async function handleDeleteAccount() {
+    if (deleteConfirmText !== 'DELETE') return;
+
+    setDeleting(true);
+    setError(null);
+
+    try {
+      const res = await api.delete('/profile');
+      if (!res.success) {
+        throw new Error(res.error || 'Failed to delete account');
+      }
+
+      // Clear any local storage data
+      localStorage.removeItem('flexer_progress');
+      localStorage.removeItem('flexer_theme');
+
+      // Sign out and redirect
+      await signOut();
+      navigate('/sign-in');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete account');
+      setDeleting(false);
+    }
   }
 
   if (loading) {
@@ -331,6 +359,69 @@ export function ProfilePage() {
           <button onClick={handleSignOut} className="btn btn-secondary">
             Sign Out
           </button>
+
+          <div className="delete-account-section">
+            <h3>Delete Account</h3>
+            {!showDeleteConfirm ? (
+              <>
+                <p className="delete-warning">
+                  Permanently delete your account and all associated data including your personal details,
+                  workout history, and any health information you've provided.
+                </p>
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="btn btn-danger"
+                >
+                  Delete My Account
+                </button>
+              </>
+            ) : (
+              <div className="delete-confirm-box">
+                <p className="delete-confirm-message">
+                  <strong>This action cannot be undone.</strong> We will permanently delete:
+                </p>
+                <ul className="delete-data-list">
+                  <li>Your personal details (age, height, weight)</li>
+                  <li>Health and injury information</li>
+                  <li>All workout plans and history</li>
+                  <li>Your account and profile</li>
+                </ul>
+                <p className="delete-confirm-note">
+                  We will not retain any of this information. You're welcome to sign up again anytime.
+                </p>
+                <p className="delete-confirm-instruction">
+                  Type <strong>DELETE</strong> to confirm:
+                </p>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={e => setDeleteConfirmText(e.target.value.toUpperCase())}
+                  placeholder="DELETE"
+                  className="delete-confirm-input"
+                  disabled={deleting}
+                />
+                <div className="delete-confirm-actions">
+                  <button
+                    onClick={() => {
+                      setShowDeleteConfirm(false);
+                      setDeleteConfirmText('');
+                    }}
+                    className="btn btn-secondary"
+                    disabled={deleting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    className="btn btn-danger"
+                    disabled={deleteConfirmText !== 'DELETE' || deleting}
+                  >
+                    {deleting ? 'Deleting...' : 'Permanently Delete'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </section>
       </main>
       </div>

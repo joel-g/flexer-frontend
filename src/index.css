@@ -1589,6 +1589,85 @@ body {
   width: 100%;
 }
 
+/* Delete Account */
+.delete-account-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+}
+
+.delete-account-section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-error);
+  margin-bottom: 8px;
+}
+
+.delete-warning {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.delete-confirm-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-error);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.delete-confirm-message {
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.delete-data-list {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 16px 20px;
+  line-height: 1.6;
+}
+
+.delete-confirm-note {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--color-background);
+  border-radius: 8px;
+}
+
+.delete-confirm-instruction {
+  font-size: 0.875rem;
+  margin-bottom: 8px;
+}
+
+.delete-confirm-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  text-align: center;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.delete-confirm-input:focus {
+  outline: none;
+  border-color: var(--color-error);
+}
+
+.delete-confirm-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.delete-confirm-actions .btn {
+  flex: 1;
+}
+
 /* Theme Picker */
 .theme-grid {
   display: grid;

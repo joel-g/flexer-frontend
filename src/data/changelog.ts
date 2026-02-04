@@ -6,6 +6,15 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: '0.6.0',
+    date: 'February 4, 2026',
+    changes: [
+      'Account deletion with full data removal',
+      'Delete personal details, workout history, and health information',
+      'Clear messaging about data retention policy',
+    ],
+  },
+  {
     version: '0.5.0',
     date: 'February 4, 2026',
     changes: [
