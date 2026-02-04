@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
+import { changelog } from '../data/changelog';
 import type { PlanResponse, WorkoutProgress, WorkoutDay } from '../types/workout';
 
 export function DashboardPage() {
@@ -10,6 +11,7 @@ export function DashboardPage() {
   const [progress, setProgress] = useState<WorkoutProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [changelogOpen, setChangelogOpen] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -147,6 +149,54 @@ export function DashboardPage() {
           Profile Settings
         </button>
       </section>
+
+      <footer className="dashboard-footer">
+        <div className="footer-links">
+          <a 
+            href="/privacy" 
+            className="footer-link"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/privacy');
+            }}
+          >
+            Privacy Policy
+          </a>
+          <span className="footer-divider">•</span>
+          <button 
+            className="footer-link changelog-toggle"
+            onClick={() => setChangelogOpen(!changelogOpen)}
+          >
+            Changelog {changelogOpen ? '▲' : '▼'}
+          </button>
+        </div>
+        
+        {changelogOpen && (
+          <div className="changelog-panel">
+            <div className="changelog-header">
+              <span className="beta-badge">BETA</span>
+              <span>What's New</span>
+            </div>
+            {changelog.map((entry) => (
+              <div key={entry.version} className="changelog-entry">
+                <div className="changelog-version">
+                  <strong>v{entry.version}</strong>
+                  <span className="changelog-date">{entry.date}</span>
+                </div>
+                <ul className="changelog-changes">
+                  {entry.changes.map((change, i) => (
+                    <li key={i}>{change}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <p className="privacy-note">
+          Your personal information is securely stored and never shared with third parties.
+        </p>
+      </footer>
     </div>
   );
 }
