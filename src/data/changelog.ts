@@ -6,6 +6,15 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: '0.4.0',
+    date: 'February 3, 2026',
+    changes: [
+      'Added 6 color themes including dark modes',
+      'Theme picker in Profile settings',
+      'All pages now support theming',
+    ],
+  },
+  {
     version: '0.3.0',
     date: 'February 3, 2026',
     changes: [

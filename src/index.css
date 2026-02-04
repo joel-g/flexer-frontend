@@ -3,6 +3,30 @@
   box-sizing: border-box;
 }
 
+/* Default theme CSS variables - will be overridden by ThemeContext */
+:root {
+  --color-primary: #667eea;
+  --color-primary-dark: #764ba2;
+  --color-primary-light: #f0f4ff;
+  --color-bg-main: #f5f7fa;
+  --color-bg-card: #ffffff;
+  --color-bg-card-alt: #f8fafc;
+  --color-bg-input: #ffffff;
+  --color-text-primary: #2d3748;
+  --color-text-secondary: #4a5568;
+  --color-text-muted: #718096;
+  --color-text-inverse: #ffffff;
+  --color-border: #e2e8f0;
+  --color-border-light: #e1e5e9;
+  --color-success: #48bb78;
+  --color-success-dark: #38a169;
+  --color-error: #e53e3e;
+  --color-error-dark: #c53030;
+  --color-error-bg: #fed7d7;
+  --color-warning: #ed8936;
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -11,8 +35,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f7fa;
-  color: #333;
+  background-color: var(--color-bg-main);
+  color: var(--color-text-primary);
   line-height: 1.6;
   overflow-x: hidden;
 }
@@ -32,8 +56,8 @@ body {
 
 /* Header styles */
 .header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--gradient-primary);
+  color: var(--color-text-inverse);
   padding: 20px 0;
   text-align: center;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -53,23 +77,23 @@ body {
 
 /* Workout card styles */
 .workout-card {
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 12px;
   margin: 20px 0;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  border: 1px solid #e1e5e9;
+  border: 1px solid var(--color-border-light);
 }
 
 .workout-title {
   font-size: 1.3rem;
   font-weight: 600;
   margin: 0 0 8px 0;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .workout-description {
-  color: #718096;
+  color: var(--color-text-muted);
   margin: 0 0 20px 0;
   font-size: 0.9rem;
 }
@@ -79,7 +103,7 @@ body {
   justify-content: space-between;
   margin-bottom: 24px;
   font-size: 0.85rem;
-  color: #718096;
+  color: var(--color-text-muted);
 }
 
 /* Exercise styles */
@@ -90,18 +114,18 @@ body {
 }
 
 .exercise-item {
-  background: #f8fafc;
+  background: var(--color-bg-card-alt);
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 12px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--color-primary);
 }
 
 .exercise-name {
   font-weight: 600;
   font-size: 1rem;
   margin: 0 0 8px 0;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .exercise-details {
@@ -118,12 +142,12 @@ body {
 }
 
 .exercise-detail strong {
-  color: #4a5568;
+  color: var(--color-text-secondary);
 }
 
 .exercise-instructions {
   font-size: 0.8rem;
-  color: #718096;
+  color: var(--color-text-muted);
   font-style: italic;
   margin-top: 8px;
   line-height: 1.4;
@@ -153,8 +177,8 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--gradient-primary);
+  color: var(--color-text-inverse);
 }
 
 .btn-primary:hover {
@@ -163,42 +187,43 @@ body {
 }
 
 .btn-secondary {
-  background: #e2e8f0;
-  color: #4a5568;
+  background: var(--color-border);
+  color: var(--color-text-secondary);
 }
 
 .btn-secondary:hover {
-  background: #cbd5e0;
+  background: var(--color-border-light);
+  filter: brightness(0.95);
 }
 
 .btn-danger {
-  background: #e53e3e;
-  color: white;
+  background: var(--color-error);
+  color: var(--color-text-inverse);
 }
 
 .btn-danger:hover {
-  background: #c53030;
+  background: var(--color-error-dark);
 }
 
 .btn-ghost {
   background: transparent;
-  color: #667eea;
-  border: 1px solid #667eea;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
   padding: 6px 12px;
   font-size: 0.8rem;
 }
 
 .btn-ghost:hover {
-  background: #f0f4ff;
+  background: var(--color-primary-light);
 }
 
 .btn-success {
-  background: #48bb78;
-  color: white;
+  background: var(--color-success);
+  color: var(--color-text-inverse);
 }
 
 .btn-success:hover {
-  background: #38a169;
+  background: var(--color-success-dark);
   transform: translateY(-1px);
 }
 
@@ -358,7 +383,7 @@ body {
 
 /* Workout Summary */
 .workout-summary {
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
@@ -369,7 +394,7 @@ body {
 .workout-summary h3 {
   margin: 0 0 16px;
   font-size: 1rem;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .summary-list {
@@ -383,7 +408,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .summary-list li:last-child {
@@ -391,14 +416,14 @@ body {
 }
 
 .summary-list .exercise-name {
-  color: #2d3748;
+  color: var(--color-text-primary);
   font-size: 0.9rem;
   flex: 1;
   padding-right: 12px;
 }
 
 .summary-list .exercise-detail {
-  color: #667eea;
+  color: var(--color-primary);
   font-weight: 600;
   font-size: 0.9rem;
   white-space: nowrap;
@@ -408,8 +433,8 @@ body {
 .btn-share {
   width: 100%;
   padding: 14px 20px;
-  background: #2d3748;
-  color: white;
+  background: var(--color-text-primary);
+  color: var(--color-text-inverse);
   border: none;
   border-radius: 8px;
   font-size: 1rem;
@@ -420,11 +445,11 @@ body {
 }
 
 .btn-share:hover {
-  background: #1a202c;
+  filter: brightness(0.85);
 }
 
 .btn-share:disabled {
-  background: #a0aec0;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -432,12 +457,12 @@ body {
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #718096;
+  color: var(--color-text-muted);
 }
 
 .empty-state h3 {
   margin-bottom: 8px;
-  color: #4a5568;
+  color: var(--color-text-secondary);
 }
 
 /* Safe area for mobile devices */
@@ -470,7 +495,7 @@ body {
 
 /* Circuit Workout Styles */
 .workout-header {
-  background: white;
+  background: var(--color-bg-card);
   padding: 20px;
   margin: 16px 0;
   border-radius: 12px;
@@ -481,14 +506,14 @@ body {
 .workout-header h1 {
   margin: 0 0 8px 0;
   font-size: 1.3rem;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .workout-progress {
   display: flex;
   justify-content: space-between;
   font-size: 0.85rem;
-  color: #718096;
+  color: var(--color-text-muted);
 }
 
 /* Set Display Styles */
@@ -497,7 +522,7 @@ body {
 }
 
 .set-progress-indicator {
-  background: white;
+  background: var(--color-bg-card);
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 16px;
@@ -507,34 +532,34 @@ body {
 .set-progress-text {
   text-align: center;
   font-weight: 600;
-  color: #4a5568;
+  color: var(--color-text-secondary);
   margin-bottom: 8px;
 }
 
 .set-progress-bar {
   height: 6px;
-  background: #e2e8f0;
+  background: var(--color-border);
   border-radius: 3px;
   overflow: hidden;
 }
 
 .set-progress-fill {
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   transition: width 0.3s ease;
 }
 
 .exercise-set-card {
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  border: 1px solid #e1e5e9;
+  border: 1px solid var(--color-border-light);
   transition: all 0.3s ease;
 }
 
 .exercise-set-card.completed {
-  border-color: #48bb78;
+  border-color: var(--color-success);
   box-shadow: 0 4px 20px rgba(72, 187, 120, 0.2);
 }
 
@@ -549,13 +574,13 @@ body {
   font-size: 1.4rem;
   font-weight: 600;
   margin: 0;
-  color: #2d3748;
+  color: var(--color-text-primary);
   flex: 1;
 }
 
 .set-indicator {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--gradient-primary);
+  color: var(--color-text-inverse);
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 0.85rem;
@@ -571,7 +596,7 @@ body {
 }
 
 .detail-item {
-  background: #f8fafc;
+  background: var(--color-bg-card-alt);
   padding: 12px 16px;
   border-radius: 8px;
   text-align: center;
@@ -580,7 +605,7 @@ body {
 .detail-label {
   display: block;
   font-size: 0.8rem;
-  color: #718096;
+  color: var(--color-text-muted);
   margin-bottom: 4px;
 }
 
@@ -588,13 +613,13 @@ body {
   display: block;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .exercise-instructions-box,
 .exercise-notes-box {
-  background: #f7fafc;
-  border-left: 4px solid #667eea;
+  background: var(--color-bg-card-alt);
+  border-left: 4px solid var(--color-primary);
   padding: 16px;
   border-radius: 0 8px 8px 0;
   margin-bottom: 16px;
@@ -604,7 +629,7 @@ body {
 .exercise-notes-box h4 {
   margin: 0 0 8px 0;
   font-size: 0.9rem;
-  color: #4a5568;
+  color: var(--color-text-secondary);
   font-weight: 600;
 }
 
@@ -613,7 +638,7 @@ body {
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.5;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .set-actions {
@@ -628,7 +653,7 @@ body {
 
 /* Rest Timer Styles */
 .rest-timer {
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 12px;
   padding: 32px 24px;
   margin: 20px 0;
@@ -645,7 +670,7 @@ body {
 
 .rest-timer-header h3 {
   margin: 0;
-  color: #2d3748;
+  color: var(--color-text-primary);
   font-size: 1.2rem;
 }
 
@@ -654,6 +679,7 @@ body {
   font-weight: 700;
   margin: 24px 0;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  color: var(--color-text-primary);
 }
 
 .rest-timer-controls {
@@ -667,10 +693,10 @@ body {
 .rest-suggestions {
   margin-top: 16px;
   padding: 12px;
-  background: #f0f9ff;
+  background: var(--color-primary-light);
   border-radius: 8px;
   font-size: 0.85rem;
-  color: #1e40af;
+  color: var(--color-primary);
 }
 
 .rest-suggestions p {
@@ -862,18 +888,18 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f5f7fa;
+  background: var(--color-bg-main);
 }
 
 .onboarding-page.generating {
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
 }
 
 .generating-content {
   text-align: center;
-  color: white;
+  color: var(--color-text-inverse);
   padding: 40px 20px;
 }
 
@@ -893,8 +919,8 @@ body {
 }
 
 .onboarding-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--gradient-primary);
+  color: var(--color-text-inverse);
   padding: 24px 20px;
   text-align: center;
 }
@@ -943,7 +969,7 @@ body {
 }
 
 .step-content {
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
@@ -951,14 +977,14 @@ body {
 
 .step-instruction {
   margin: 0 0 20px;
-  color: #4a5568;
+  color: var(--color-text-secondary);
   font-size: 0.95rem;
 }
 
 .step-note,
 .section-note {
   margin: -12px 0 16px;
-  color: #718096;
+  color: var(--color-text-muted);
   font-size: 0.85rem;
   font-style: italic;
 }
@@ -968,8 +994,8 @@ body {
   display: flex;
   gap: 12px;
   justify-content: center;
-  background: white;
-  border-top: 1px solid #e2e8f0;
+  background: var(--color-bg-card);
+  border-top: 1px solid var(--color-border);
 }
 
 .onboarding-footer .btn {
@@ -977,8 +1003,8 @@ body {
 }
 
 .error-banner {
-  background: #fed7d7;
-  color: #c53030;
+  background: var(--color-error-bg);
+  color: var(--color-error-dark);
   padding: 12px 16px;
   border-radius: 8px;
   margin-bottom: 16px;
@@ -993,7 +1019,7 @@ body {
 .form-group label {
   display: block;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--color-text-primary);
   margin-bottom: 8px;
   font-size: 0.9rem;
 }
@@ -1003,16 +1029,18 @@ body {
 .form-group textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.2s;
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-primary);
 }
 
 .form-group textarea {
@@ -1042,9 +1070,10 @@ body {
 
 .btn-option {
   padding: 12px 20px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--color-border);
   border-radius: 8px;
-  background: white;
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.2s;
@@ -1053,20 +1082,20 @@ body {
 }
 
 .btn-option:hover {
-  border-color: #667eea;
+  border-color: var(--color-primary);
 }
 
 .btn-option.selected {
-  border-color: #667eea;
-  background: #667eea;
-  color: white;
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 
 .btn-option-large {
   padding: 16px 20px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--color-border);
   border-radius: 12px;
-  background: white;
+  background: var(--color-bg-card);
   cursor: pointer;
   text-align: left;
   transition: all 0.2s;
@@ -1075,27 +1104,28 @@ body {
 }
 
 .btn-option-large:hover {
-  border-color: #667eea;
+  border-color: var(--color-primary);
 }
 
 .btn-option-large.selected {
-  border-color: #667eea;
-  background: #f0f4ff;
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
 }
 
 .btn-option-large strong {
   display: block;
   font-size: 1rem;
   margin-bottom: 4px;
+  color: var(--color-text-primary);
 }
 
 .btn-option-large span {
   font-size: 0.85rem;
-  color: #718096;
+  color: var(--color-text-muted);
 }
 
 .btn-option-large.selected span {
-  color: #4a5568;
+  color: var(--color-text-secondary);
 }
 
 .checkbox-grid {
@@ -1106,9 +1136,10 @@ body {
 
 .btn-checkbox {
   padding: 14px 16px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--color-border);
   border-radius: 8px;
-  background: white;
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.2s;
@@ -1116,13 +1147,13 @@ body {
 }
 
 .btn-checkbox:hover {
-  border-color: #667eea;
+  border-color: var(--color-primary);
 }
 
 .btn-checkbox.selected {
-  border-color: #667eea;
-  background: #667eea;
-  color: white;
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 
 .slider-group {
@@ -1135,7 +1166,7 @@ body {
   flex: 1;
   height: 8px;
   -webkit-appearance: none;
-  background: #e2e8f0;
+  background: var(--color-border);
   border-radius: 4px;
 }
 
@@ -1144,14 +1175,14 @@ body {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #667eea;
+  background: var(--color-primary);
   cursor: pointer;
 }
 
 .slider-value {
   min-width: 70px;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .examples {
@@ -1210,7 +1241,7 @@ body {
 /* ===== Dashboard ===== */
 .dashboard-page {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--color-bg-main);
   padding: 20px;
   max-width: 500px;
   margin: 0 auto;
@@ -1219,11 +1250,11 @@ body {
 .dashboard-header h1 {
   margin: 0 0 20px;
   font-size: 1.5rem;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .plan-summary {
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 20px;
@@ -1233,12 +1264,12 @@ body {
 .plan-summary h2 {
   margin: 0 0 8px;
   font-size: 1.2rem;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .plan-summary > p {
   margin: 0 0 20px;
-  color: #718096;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
 }
 
@@ -1248,7 +1279,7 @@ body {
 
 .progress-bar {
   height: 8px;
-  background: #e2e8f0;
+  background: var(--color-border);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -1256,14 +1287,14 @@ body {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: var(--gradient-primary);
   border-radius: 4px;
   transition: width 0.3s ease;
 }
 
 .progress-text {
   font-size: 0.85rem;
-  color: #718096;
+  color: var(--color-text-muted);
 }
 
 .plan-stats {
@@ -1275,21 +1306,22 @@ body {
   flex: 1;
   text-align: center;
   padding: 12px;
-  background: #f8fafc;
+  background: var(--color-bg-card-alt);
   border-radius: 8px;
 }
 
 .plan-stats .stat-value {
   font-size: 1.2rem;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .plan-stats .stat-label {
   font-size: 0.75rem;
+  color: var(--color-text-muted);
 }
 
 .next-workout {
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 20px;
@@ -1299,7 +1331,7 @@ body {
 .next-workout h3 {
   margin: 0 0 16px;
   font-size: 0.9rem;
-  color: #718096;
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -1307,12 +1339,12 @@ body {
 .workout-preview h4 {
   margin: 0 0 8px;
   font-size: 1.1rem;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .workout-preview > p {
   margin: 0 0 12px;
-  color: #718096;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
 }
 
@@ -1336,7 +1368,7 @@ body {
 .dashboard-footer {
   margin-top: 40px;
   padding-top: 20px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--color-border);
   text-align: center;
 }
 
@@ -1349,7 +1381,7 @@ body {
 }
 
 .footer-link {
-  color: #667eea;
+  color: var(--color-primary);
   font-size: 0.85rem;
   text-decoration: none;
   background: none;
@@ -1361,12 +1393,12 @@ body {
 }
 
 .footer-link:hover {
-  color: #764ba2;
+  color: var(--color-primary-dark);
   text-decoration: underline;
 }
 
 .footer-divider {
-  color: #cbd5e0;
+  color: var(--color-text-muted);
   font-size: 0.7rem;
 }
 
@@ -1377,7 +1409,7 @@ body {
 }
 
 .changelog-panel {
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 12px;
   padding: 20px;
   margin: 16px 0;
@@ -1404,12 +1436,12 @@ body {
   margin-bottom: 16px;
   font-size: 1rem;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .beta-badge {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: var(--gradient-primary);
+  color: var(--color-text-inverse);
   font-size: 0.65rem;
   font-weight: 700;
   padding: 3px 8px;
@@ -1419,7 +1451,7 @@ body {
 
 .changelog-entry {
   padding: 12px 0;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .changelog-entry:last-child {
@@ -1435,19 +1467,19 @@ body {
 }
 
 .changelog-version strong {
-  color: #2d3748;
+  color: var(--color-text-primary);
   font-size: 0.9rem;
 }
 
 .changelog-date {
-  color: #a0aec0;
+  color: var(--color-text-muted);
   font-size: 0.75rem;
 }
 
 .changelog-changes {
   margin: 0;
   padding-left: 18px;
-  color: #4a5568;
+  color: var(--color-text-secondary);
 }
 
 .changelog-changes li {
@@ -1463,7 +1495,7 @@ body {
 .dashboard-footer .privacy-note {
   margin: 8px 0 0;
   font-size: 0.75rem;
-  color: #a0aec0;
+  color: var(--color-text-muted);
 }
 
 .no-plan {
@@ -1473,18 +1505,18 @@ body {
 
 .no-plan h2 {
   margin: 0 0 12px;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .no-plan p {
   margin: 0 0 24px;
-  color: #718096;
+  color: var(--color-text-muted);
 }
 
 /* ===== Profile Page ===== */
 .profile-page {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--color-bg-main);
   padding: 20px;
   max-width: 500px;
   margin: 0 auto;
@@ -1500,7 +1532,7 @@ body {
 .profile-header h1 {
   margin: 0;
   font-size: 1.3rem;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .profile-content {
@@ -1510,7 +1542,7 @@ body {
 }
 
 .profile-section {
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
@@ -1519,12 +1551,12 @@ body {
 .profile-section h2 {
   margin: 0 0 20px;
   font-size: 1.1rem;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .section-description {
   margin: -12px 0 16px;
-  color: #718096;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
 }
 
@@ -1539,14 +1571,14 @@ body {
 
 .profile-note {
   text-align: center;
-  color: #718096;
+  color: var(--color-text-muted);
   font-size: 0.85rem;
   margin: 0;
 }
 
 .success-banner {
-  background: #c6f6d5;
-  color: #22543d;
+  background: var(--color-success);
+  color: var(--color-text-inverse);
   padding: 12px 16px;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -1555,6 +1587,73 @@ body {
 
 .account-section .btn {
   width: 100%;
+}
+
+/* Theme Picker */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.theme-option {
+  background: none;
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-option:hover {
+  border-color: var(--color-primary);
+}
+
+.theme-option.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.theme-preview {
+  width: 100%;
+  aspect-ratio: 4/3;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.theme-preview-bg {
+  width: 100%;
+  height: 100%;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-preview-card {
+  width: 80%;
+  height: 60%;
+  border-radius: 4px;
+  display: flex;
+  align-items: flex-start;
+  padding: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.theme-preview-accent {
+  width: 60%;
+  height: 6px;
+  border-radius: 2px;
+}
+
+.theme-name {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
 }
 
 .danger-zone {
@@ -1585,7 +1684,7 @@ body {
 /* ===== Plan Overview ===== */
 .plan-page {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--color-bg-main);
   padding: 20px;
   max-width: 500px;
   margin: 0 auto;
@@ -1601,7 +1700,7 @@ body {
 .back-btn {
   background: none;
   border: none;
-  color: #667eea;
+  color: var(--color-primary);
   font-size: 1rem;
   cursor: pointer;
   padding: 8px 0;
@@ -1610,11 +1709,11 @@ body {
 .plan-header h1 {
   margin: 0;
   font-size: 1.3rem;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .plan-description {
-  color: #718096;
+  color: var(--color-text-muted);
   margin: 0 0 24px;
   font-size: 0.9rem;
 }
@@ -1626,7 +1725,7 @@ body {
 }
 
 .week-card {
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 10px rgba(0,0,0,0.06);
@@ -1635,7 +1734,7 @@ body {
 .week-header {
   width: 100%;
   padding: 16px 20px;
-  background: white;
+  background: var(--color-bg-card);
   border: none;
   display: flex;
   justify-content: space-between;
@@ -1645,24 +1744,24 @@ body {
 }
 
 .week-header:hover {
-  background: #f8fafc;
+  background: var(--color-bg-card-alt);
 }
 
 .week-title h3 {
   margin: 0 0 4px;
   font-size: 1rem;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .week-title p {
   margin: 0;
   font-size: 0.85rem;
-  color: #718096;
+  color: var(--color-text-muted);
 }
 
 .expand-icon {
   font-size: 1.5rem;
-  color: #718096;
+  color: var(--color-text-muted);
 }
 
 .week-days {
@@ -1677,35 +1776,35 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
-  background: #f8fafc;
+  background: var(--color-bg-card-alt);
   border-radius: 8px;
-  border-left: 4px solid #e2e8f0;
+  border-left: 4px solid var(--color-border);
 }
 
 .day-card.completed {
-  border-left-color: #48bb78;
+  border-left-color: var(--color-success);
 }
 
 .day-card.current {
-  border-left-color: #667eea;
-  background: #f0f4ff;
+  border-left-color: var(--color-primary);
+  background: var(--color-primary-light);
 }
 
 .day-info h4 {
   margin: 0 0 4px;
   font-size: 0.95rem;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .day-info p {
   margin: 0 0 4px;
   font-size: 0.8rem;
-  color: #718096;
+  color: var(--color-text-muted);
 }
 
 .exercise-count {
   font-size: 0.8rem;
-  color: #a0aec0;
+  color: var(--color-text-muted);
 }
 
 .status-badge.completed {
@@ -1714,8 +1813,8 @@ body {
   justify-content: center;
   width: 28px;
   height: 28px;
-  background: #48bb78;
-  color: white;
+  background: var(--color-success);
+  color: var(--color-text-inverse);
   border-radius: 50%;
   font-size: 0.9rem;
 }
@@ -2013,31 +2112,31 @@ body {
   margin-bottom: 20px;
   border-radius: 8px;
   overflow: hidden;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--color-border);
 }
 
 .btn-toggle {
   flex: 1;
   padding: 10px 16px;
   border: none;
-  background: white;
+  background: var(--color-bg-card);
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.2s;
-  color: #718096;
+  color: var(--color-text-muted);
 }
 
 .btn-toggle:first-child {
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid var(--color-border);
 }
 
 .btn-toggle.active {
-  background: #667eea;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 
 .btn-toggle:hover:not(.active) {
-  background: #f8fafc;
+  background: var(--color-bg-card-alt);
 }
 
 /* Imperial height inputs */
@@ -2056,29 +2155,31 @@ body {
 .height-field input {
   flex: 1;
   padding: 12px 16px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.2s;
   width: 100%;
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
 }
 
 .height-field input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-primary);
 }
 
 .unit-label {
   font-size: 0.9rem;
-  color: #718096;
+  color: var(--color-text-muted);
   font-weight: 500;
   min-width: 20px;
 }
 
 .prompt-error {
-  background: #fff5f5;
-  border: 1px solid #fed7d7;
-  color: #c53030;
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error);
+  color: var(--color-error-dark);
   padding: 16px;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -2087,7 +2188,7 @@ body {
 /* ===== Privacy Policy Page ===== */
 .privacy-page {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--color-bg-main);
   padding: 20px;
   max-width: 700px;
   margin: 0 auto;
@@ -2103,7 +2204,7 @@ body {
 .privacy-header .back-button {
   background: none;
   border: none;
-  color: #667eea;
+  color: var(--color-primary);
   font-size: 1rem;
   cursor: pointer;
   padding: 8px 0;
@@ -2111,24 +2212,24 @@ body {
 }
 
 .privacy-header .back-button:hover {
-  color: #764ba2;
+  color: var(--color-primary-dark);
 }
 
 .privacy-header h1 {
   margin: 0;
   font-size: 1.5rem;
-  color: #2d3748;
+  color: var(--color-text-primary);
 }
 
 .privacy-content {
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
 }
 
 .privacy-content .last-updated {
-  color: #a0aec0;
+  color: var(--color-text-muted);
   font-size: 0.85rem;
   margin: 0 0 24px;
 }
@@ -2143,12 +2244,12 @@ body {
 
 .privacy-section h2 {
   font-size: 1.1rem;
-  color: #2d3748;
+  color: var(--color-text-primary);
   margin: 0 0 12px;
 }
 
 .privacy-section p {
-  color: #4a5568;
+  color: var(--color-text-secondary);
   line-height: 1.7;
   margin: 0 0 12px;
   font-size: 0.95rem;
@@ -2157,7 +2258,7 @@ body {
 .privacy-section ul {
   margin: 0;
   padding-left: 20px;
-  color: #4a5568;
+  color: var(--color-text-secondary);
   line-height: 1.8;
 }
 
@@ -2167,12 +2268,12 @@ body {
 }
 
 .privacy-section.highlight {
-  background: linear-gradient(135deg, #f0f4ff, #faf5ff);
+  background: var(--color-primary-light);
   padding: 24px;
   border-radius: 12px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--color-primary);
 }
 
 .privacy-section.highlight h2 {
-  color: #667eea;
+  color: var(--color-primary);
 }

@@ -293,6 +293,7 @@ export const CircuitWorkoutDisplay: React.FC = () => {
       </div>
 
       <SetDisplay
+        key={currentSetIndex}
         exercise={currentSet.exercise}
         setNumber={currentSet.setNumber}
         totalSets={currentSet.exercise.sets}

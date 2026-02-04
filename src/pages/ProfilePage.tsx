@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 import { useApi } from '../hooks/useApi';
+import { useTheme } from '../context/ThemeContext';
+import { themes, themeIds } from '../data/themes';
 import type { UserProfile, ProfileUpdateRequest } from '../types/workout';
 
 const EQUIPMENT_OPTIONS = [
@@ -20,6 +22,7 @@ export function ProfilePage() {
   const api = useApi();
   const navigate = useNavigate();
   const { signOut } = useClerk();
+  const { themeId, setTheme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -267,6 +270,41 @@ export function ProfilePage() {
                 {eq.label}
               </button>
             ))}
+          </div>
+        </section>
+
+        <section className="profile-section">
+          <h2>Theme</h2>
+          <p className="section-description">Choose your preferred color theme</p>
+          <div className="theme-grid">
+            {themeIds.map(id => {
+              const t = themes[id];
+              return (
+                <button
+                  key={id}
+                  className={`theme-option ${themeId === id ? 'selected' : ''}`}
+                  onClick={() => setTheme(id)}
+                >
+                  <div className="theme-preview">
+                    <div 
+                      className="theme-preview-bg" 
+                      style={{ background: t.preview.background }}
+                    >
+                      <div 
+                        className="theme-preview-card" 
+                        style={{ background: t.preview.card }}
+                      >
+                        <div 
+                          className="theme-preview-accent" 
+                          style={{ background: t.preview.primary }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <span className="theme-name">{t.name}</span>
+                </button>
+              );
+            })}
           </div>
         </section>
 
