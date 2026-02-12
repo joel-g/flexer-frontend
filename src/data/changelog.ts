@@ -6,9 +6,10 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
-    version: '0.6.1',
+    version: '0.7.0',
     date: 'February 11, 2026',
     changes: [
+      'Added Terms of Service with AI workout liability disclaimer',
       'Fixed plan import failing when copied from ChatGPT due to smart/curly quotes',
       'Plan import now handles markdown code fences added by some AI assistants',
     ],

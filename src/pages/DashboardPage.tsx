@@ -160,8 +160,8 @@ export function DashboardPage() {
 
       <footer className="dashboard-footer">
         <div className="footer-links">
-          <a 
-            href="/privacy" 
+          <a
+            href="/privacy"
             className="footer-link"
             onClick={(e) => {
               e.preventDefault();
@@ -171,7 +171,18 @@ export function DashboardPage() {
             Privacy Policy
           </a>
           <span className="footer-divider">•</span>
-          <button 
+          <a
+            href="/terms"
+            className="footer-link"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/terms');
+            }}
+          >
+            Terms of Service
+          </a>
+          <span className="footer-divider">•</span>
+          <button
             className="footer-link changelog-toggle"
             onClick={() => setChangelogOpen(!changelogOpen)}
           >

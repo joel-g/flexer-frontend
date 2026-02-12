@@ -8,6 +8,7 @@ import { WorkoutPage } from './pages/WorkoutPage';
 import { PlanOverviewPage } from './pages/PlanOverviewPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import './App.css';
 
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -43,6 +44,7 @@ function AppRoutes() {
 
       {/* Public routes */}
       <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms" element={<TermsOfServicePage />} />
 
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>

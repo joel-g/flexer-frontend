@@ -276,6 +276,13 @@ export const CircuitWorkoutDisplay: React.FC = () => {
           restSeconds={currentSet.exercise.restSeconds}
           onComplete={handleRestComplete}
           onSkip={handleSkipRest}
+          nextExercise={workoutSets[currentSetIndex + 1] ? {
+            name: workoutSets[currentSetIndex + 1].exercise.name,
+            setNumber: workoutSets[currentSetIndex + 1].setNumber,
+            totalSets: workoutSets[currentSetIndex + 1].exercise.sets,
+            reps: workoutSets[currentSetIndex + 1].exercise.reps,
+            weight: workoutSets[currentSetIndex + 1].exercise.weight,
+          } : undefined}
         />
       </div>
     );

@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react';
 
+interface NextExerciseInfo {
+  name: string;
+  setNumber: number;
+  totalSets: number;
+  reps: string;
+  weight?: string;
+}
+
 interface RestTimerProps {
   restSeconds: number;
   onComplete: () => void;
   onSkip: () => void;
+  nextExercise?: NextExerciseInfo;
 }
 
-export const RestTimer: React.FC<RestTimerProps> = ({ restSeconds, onComplete, onSkip }) => {
+export const RestTimer: React.FC<RestTimerProps> = ({ restSeconds, onComplete, onSkip, nextExercise }) => {
   const [timeLeft, setTimeLeft] = useState(restSeconds);
   const [isActive, setIsActive] = useState(true);
 
@@ -75,6 +84,18 @@ export const RestTimer: React.FC<RestTimerProps> = ({ restSeconds, onComplete, o
         )}
       </div>
       
+      {nextExercise && (
+        <div className="rest-up-next">
+          <p className="rest-up-next-label">Up Next</p>
+          <p className="rest-up-next-name">{nextExercise.name}</p>
+          <p className="rest-up-next-details">
+            Set {nextExercise.setNumber} of {nextExercise.totalSets}
+            {' · '}{nextExercise.reps} reps
+            {nextExercise.weight && <> · {nextExercise.weight}</>}
+          </p>
+        </div>
+      )}
+
       <div className="rest-suggestions">
         <p>💡 Use this time to hydrate and prepare for the next set</p>
       </div>
