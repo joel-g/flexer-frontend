@@ -172,12 +172,19 @@ export function OnboardingPage() {
     setValidationErrors([]);
 
     try {
-      // Parse JSON
+      // Parse JSON — normalize smart/curly quotes and strip markdown code fences
+      // that ChatGPT and other LLMs add when copying from their web UI
       let planJson: unknown;
       try {
-        planJson = JSON.parse(jsonInput);
+        const cleaned = jsonInput
+          .trim()
+          .replace(/^```(?:json)?\s*/i, '')
+          .replace(/\s*```\s*$/i, '')
+          .replace(/[\u201C\u201D]/g, '"')
+          .replace(/[\u2018\u2019]/g, "'");
+        planJson = JSON.parse(cleaned);
       } catch {
-        setValidationErrors(['Invalid JSON. Make sure you copied the complete response from your AI.']);
+        setValidationErrors(['Invalid JSON. Make sure you copied the complete response from your AI. If you copied from ChatGPT\'s web interface, try using the copy button on the message instead.']);
         setImporting(false);
         return;
       }
