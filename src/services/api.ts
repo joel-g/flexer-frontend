@@ -68,3 +68,26 @@ class ApiClient {
 
 export const api = new ApiClient();
 export type { ApiResponse };
+
+// ===== Session API Methods =====
+
+import type {
+  StartSessionRequest,
+  StartSessionResponse,
+  UpsertSetLogRequest,
+  CompleteSessionRequest,
+} from '../types/workout';
+
+export const sessionApi = {
+  async startSession(data: StartSessionRequest): Promise<ApiResponse<StartSessionResponse>> {
+    return api.post('/sessions/start', data);
+  },
+
+  async upsertSetLog(sessionId: string, data: UpsertSetLogRequest): Promise<ApiResponse<{ setLogId: string }>> {
+    return api.put(`/sessions/${sessionId}/sets`, data);
+  },
+
+  async completeSession(sessionId: string, data: CompleteSessionRequest): Promise<ApiResponse<{ sessionId: string; status: string }>> {
+    return api.post(`/sessions/${sessionId}/complete`, data);
+  },
+};

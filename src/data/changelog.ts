@@ -6,6 +6,15 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: '0.8.0',
+    date: 'February 13, 2026',
+    changes: [
+      'In-workout set logging: track actual reps and weight for each set',
+      'Smart input fields based on exercise type (weights, bands, timed, distance)',
+      'Session tracking for workout history foundation',
+    ],
+  },
+  {
     version: '0.7.0',
     date: 'February 11, 2026',
     changes: [

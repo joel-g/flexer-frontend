@@ -1,22 +1,47 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
-import type { WorkoutProgress, WorkoutDay, WorkoutPlan, PlanResponse } from '../types/workout';
+import type { WorkoutProgress, WorkoutDay, WorkoutPlan, PlanResponse, LoadType, WeightUnit } from '../types/workout';
 import { useAuth } from '@clerk/clerk-react';
-import { api } from '../services/api';
+import { api, sessionApi } from '../services/api';
+
+interface SetLogData {
+  exerciseId: string;
+  exerciseName: string;
+  setNumber: number;
+  targetReps?: string;
+  targetWeight?: string;
+  actualReps?: number;
+  actualWeightValue?: number;
+  actualWeightUnit?: WeightUnit;
+  actualDurationSeconds?: number;
+  actualDistanceValue?: number;
+  actualDistanceUnit?: 'mi' | 'km' | 'm';
+  qualitativeLoadLabel?: string;
+  loadType?: LoadType;
+}
 
 interface WorkoutContextType {
   currentPlan: WorkoutPlan | null;
+  currentPlanId: string | null;
   progress: WorkoutProgress;
   currentWorkout: WorkoutDay | null;
   loading: boolean;
   error: string | null;
+  // Session state
+  currentSessionId: string | null;
+  sessionStartTime: Date | null;
+  // Navigation
   nextWorkout: () => void;
   previousWorkout: () => void;
-  completeCurrentWorkout: () => void;
+  completeCurrentWorkout: () => Promise<void>;
   uncompleteWorkout: (workoutDayId: string) => void;
   resetProgress: () => void;
   refreshData: () => Promise<void>;
   deletePlan: () => Promise<boolean>;
+  // Session methods
+  startWorkoutSession: () => Promise<string | null>;
+  logSetCompletion: (data: SetLogData) => Promise<void>;
+  endWorkoutSession: (totalSetsPlanned: number, totalSetsCompleted: number) => Promise<void>;
 }
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
@@ -42,6 +67,7 @@ const DEFAULT_PROGRESS: WorkoutProgress = {
 export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) => {
   const { isSignedIn, getToken } = useAuth();
   const [currentPlan, setCurrentPlan] = useState<WorkoutPlan | null>(null);
+  const [currentPlanId, setCurrentPlanId] = useState<string | null>(null);
   const [progress, setProgress] = useState<WorkoutProgress>(() => {
     // Initialize from localStorage for immediate display
     const saved = localStorage.getItem('workout-progress');
@@ -49,6 +75,10 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Session state
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
 
   // Debounce timer for syncing to API
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -109,6 +139,7 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
 
       if (plansRes.success && plansRes.data?.plans.length) {
         setCurrentPlan(plansRes.data.plans[0].planData);
+        setCurrentPlanId(plansRes.data.plans[0].id);
       }
 
       if (progressRes.success && progressRes.data) {
@@ -182,7 +213,7 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
     });
   };
 
-  const completeCurrentWorkout = () => {
+  const completeCurrentWorkout = async () => {
     const currentWorkout = getCurrentWorkout();
     if (currentWorkout) {
       setProgress(prev => {
@@ -193,6 +224,104 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
         syncProgressToApi(newProgress);
         return newProgress;
       });
+    }
+  };
+
+  // Session management methods
+  const startWorkoutSession = async (): Promise<string | null> => {
+    const workout = getCurrentWorkout();
+    if (!workout || !currentPlanId) {
+      console.error('Cannot start session: no workout or plan');
+      return null;
+    }
+
+    try {
+      const startTime = new Date();
+      const response = await sessionApi.startSession({
+        planId: currentPlanId,
+        workoutDayId: workout.id,
+        weekNumber: progress.currentWeek + 1,
+        dayNumber: progress.currentDay + 1,
+        workoutName: workout.name,
+        startedAt: startTime.toISOString(),
+      });
+
+      if (response.success && response.data) {
+        setCurrentSessionId(response.data.sessionId);
+        setSessionStartTime(startTime);
+        console.log('Session started:', response.data.sessionId, response.data.isResume ? '(resumed)' : '(new)');
+        return response.data.sessionId;
+      } else {
+        console.error('Failed to start session:', response.error);
+        return null;
+      }
+    } catch (err) {
+      console.error('Error starting session:', err);
+      return null;
+    }
+  };
+
+  const logSetCompletion = async (data: SetLogData): Promise<void> => {
+    if (!currentSessionId) {
+      console.warn('No active session, skipping set log');
+      return;
+    }
+
+    try {
+      const response = await sessionApi.upsertSetLog(currentSessionId, {
+        exerciseId: data.exerciseId,
+        exerciseName: data.exerciseName,
+        loadType: data.loadType || 'external_weight',
+        setNumber: data.setNumber,
+        targetReps: data.targetReps,
+        targetWeight: data.targetWeight,
+        actualReps: data.actualReps,
+        actualWeightValue: data.actualWeightValue,
+        actualWeightUnit: data.actualWeightUnit,
+        actualDurationSeconds: data.actualDurationSeconds,
+        actualDistanceValue: data.actualDistanceValue,
+        actualDistanceUnit: data.actualDistanceUnit,
+        qualitativeLoadLabel: data.qualitativeLoadLabel,
+        completed: true,
+        loggedAt: new Date().toISOString(),
+      });
+
+      if (!response.success) {
+        console.error('Failed to log set:', response.error);
+      }
+    } catch (err) {
+      console.error('Error logging set:', err);
+    }
+  };
+
+  const endWorkoutSession = async (totalSetsPlanned: number, totalSetsCompleted: number): Promise<void> => {
+    if (!currentSessionId || !sessionStartTime) {
+      console.warn('No active session to end');
+      return;
+    }
+
+    try {
+      const completedAt = new Date();
+      const durationSeconds = Math.floor((completedAt.getTime() - sessionStartTime.getTime()) / 1000);
+
+      const response = await sessionApi.completeSession(currentSessionId, {
+        completedAt: completedAt.toISOString(),
+        durationSeconds,
+        totalSetsPlanned,
+        totalSetsCompleted,
+      });
+
+      if (response.success) {
+        console.log('Session completed:', currentSessionId);
+      } else {
+        console.error('Failed to complete session:', response.error);
+      }
+    } catch (err) {
+      console.error('Error completing session:', err);
+    } finally {
+      // Clear session state regardless of API result
+      setCurrentSessionId(null);
+      setSessionStartTime(null);
     }
   };
 
@@ -229,6 +358,7 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
       if (deleteRes.success) {
         // Clear local state
         setCurrentPlan(null);
+        setCurrentPlanId(null);
         setProgress(DEFAULT_PROGRESS);
         localStorage.removeItem('workout-progress');
         return true;
@@ -243,10 +373,13 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
   return (
     <WorkoutContext.Provider value={{
       currentPlan,
+      currentPlanId,
       progress,
       currentWorkout: getCurrentWorkout(),
       loading,
       error,
+      currentSessionId,
+      sessionStartTime,
       nextWorkout,
       previousWorkout,
       completeCurrentWorkout,
@@ -254,6 +387,9 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
       resetProgress,
       refreshData,
       deletePlan,
+      startWorkoutSession,
+      logSetCompletion,
+      endWorkoutSession,
     }}>
       {children}
     </WorkoutContext.Provider>

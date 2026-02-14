@@ -1,9 +1,23 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import { useWorkout } from '../context/WorkoutContext';
 import { SetDisplay } from './SetDisplay';
+import type { SetCompletionData } from './SetDisplay';
 import { RestTimer } from './RestTimer';
-import type { Exercise } from '../types/workout';
+import type { Exercise, LoadType } from '../types/workout';
+
+// Get loadType from exercise, or infer for legacy plans
+function getExerciseLoadType(exercise: Exercise): LoadType {
+  if (exercise.loadType) return exercise.loadType;
+  // Legacy fallback: infer from weight field only
+  if (!exercise.weight) return 'bodyweight';
+  const weight = exercise.weight.toLowerCase().trim();
+  if (weight === 'bodyweight' || weight === 'bw' || weight === '') return 'bodyweight';
+  if (/\d/.test(weight)) return 'external_weight';
+  if (weight.includes('band')) return 'band';
+  if (weight.includes('plate') || weight.includes('level')) return 'machine_level';
+  return 'bodyweight';
+}
 
 interface WorkoutSet {
   exercise: Exercise;
@@ -22,13 +36,37 @@ export const CircuitWorkoutDisplay: React.FC = () => {
     error,
     nextWorkout,
     previousWorkout,
-    completeCurrentWorkout
+    completeCurrentWorkout,
+    currentSessionId,
+    startWorkoutSession,
+    logSetCompletion,
+    endWorkoutSession,
   } = useWorkout();
 
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
   const [workoutState, setWorkoutState] = useState<WorkoutState>('exercise');
   const [isSharing, setIsSharing] = useState(false);
+  const [completedSetsCount, setCompletedSetsCount] = useState(0);
   const shareCardRef = useRef<HTMLDivElement>(null);
+  const sessionStartedRef = useRef(false);
+
+  // Start session when workout begins
+  useEffect(() => {
+    if (currentWorkout && !currentSessionId && !sessionStartedRef.current && workoutState === 'exercise') {
+      sessionStartedRef.current = true;
+      startWorkoutSession().then((sessionId) => {
+        if (!sessionId) {
+          sessionStartedRef.current = false;
+        }
+      });
+    }
+  }, [currentWorkout, currentSessionId, workoutState]);
+
+  // Reset session ref when workout changes
+  useEffect(() => {
+    sessionStartedRef.current = false;
+    setCompletedSetsCount(0);
+  }, [currentWorkout?.id]);
 
   // Generate flat array of all sets in circuit order
   // NOTE: This must be before any early returns to satisfy React's rules of hooks
@@ -108,18 +146,41 @@ export const CircuitWorkoutDisplay: React.FC = () => {
     );
   }
 
-  const handleSetComplete = () => {
+  const handleSetComplete = async (data: SetCompletionData) => {
+    // Log the set completion
+    if (currentSessionId) {
+      await logSetCompletion({
+        exerciseId: currentSet.exercise.id,
+        exerciseName: currentSet.exercise.name,
+        setNumber: currentSet.setNumber,
+        targetReps: currentSet.exercise.reps,
+        targetWeight: currentSet.exercise.weight,
+        actualReps: data.actualReps,
+        actualWeightValue: data.actualWeightValue,
+        actualWeightUnit: data.actualWeightUnit,
+        actualDurationSeconds: data.actualDurationSeconds,
+        actualDistanceValue: data.actualDistanceValue,
+        actualDistanceUnit: data.actualDistanceUnit,
+        qualitativeLoadLabel: data.qualitativeLoadLabel,
+        loadType: getExerciseLoadType(currentSet.exercise),
+      });
+    }
+    setCompletedSetsCount(prev => prev + 1);
+
     if (isLastSet) {
+      // End session before completing workout
+      const totalSets = workoutSets.length;
+      await endWorkoutSession(totalSets, completedSetsCount + 1);
       // Workout completed
       setWorkoutState('completed');
-      completeCurrentWorkout();
+      await completeCurrentWorkout();
     } else {
       // Check if we need rest time
       const nextSet = workoutSets[currentSetIndex + 1];
-      const shouldRest = currentSet.exercise.restSeconds && 
+      const shouldRest = currentSet.exercise.restSeconds &&
                         currentSet.exercise.restSeconds > 0 &&
                         nextSet?.exercise.id !== currentSet.exercise.id; // Only rest between different exercises
-      
+
       if (shouldRest) {
         setWorkoutState('rest');
       } else {

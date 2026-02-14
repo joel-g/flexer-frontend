@@ -1,9 +1,19 @@
+export type ExerciseLoadType =
+  | 'external_weight'
+  | 'bodyweight'
+  | 'assisted'
+  | 'band'
+  | 'machine_level'
+  | 'timed'
+  | 'distance';
+
 export interface Exercise {
   id: string;
   name: string;
   sets: number;
   reps: string; // Can be "8-12", "15", "AMRAP", etc.
-  weight?: string; // "bodyweight", "60 lbs", "previous + 5 lbs", etc.
+  loadType: ExerciseLoadType; // Determines which input fields to show
+  weight?: string; // "60 lbs", "25 kg", etc. (for external_weight, assisted, band)
   restSeconds?: number;
   notes?: string;
   instructions?: string;
@@ -98,4 +108,91 @@ export interface PlanResponse {
   isActive: boolean;
   createdAt: string;
   planData: WorkoutPlan;
+}
+
+// ===== Session/Set Logging Types =====
+
+export type LoadType =
+  | 'external_weight'
+  | 'bodyweight'
+  | 'assisted'
+  | 'band'
+  | 'machine_level'
+  | 'timed'
+  | 'distance'
+  | 'mixed';
+
+export type SessionStatus = 'in_progress' | 'completed' | 'abandoned';
+
+export type WeightUnit = 'lbs' | 'kg';
+
+export interface WorkoutSession {
+  id: string;
+  workoutDayId: string;
+  workoutName: string;
+  weekNumber: number;
+  dayNumber: number;
+  status: SessionStatus;
+  startedAt: string;
+  completedAt?: string;
+  durationSeconds?: number;
+  totalExercises?: number;
+  totalSetsPlanned?: number;
+  totalSetsCompleted?: number;
+}
+
+export interface WorkoutSetLog {
+  id: string;
+  sessionId: string;
+  exerciseId: string;
+  exerciseName: string;
+  loadType: LoadType;
+  setNumber: number;
+  targetReps?: string;
+  targetWeight?: string;
+  actualReps?: number;
+  actualWeightValue?: number;
+  actualWeightUnit?: WeightUnit;
+  completed: boolean;
+  loggedAt: string;
+}
+
+export interface StartSessionRequest {
+  planId: string;
+  workoutDayId: string;
+  weekNumber: number;
+  dayNumber: number;
+  workoutName: string;
+  startedAt: string;
+}
+
+export interface StartSessionResponse {
+  sessionId: string;
+  status: SessionStatus;
+  isResume: boolean;
+}
+
+export interface UpsertSetLogRequest {
+  exerciseId: string;
+  exerciseName: string;
+  loadType: LoadType;
+  setNumber: number;
+  targetReps?: string;
+  targetWeight?: string;
+  actualReps?: number;
+  actualWeightValue?: number;
+  actualWeightUnit?: WeightUnit;
+  actualDurationSeconds?: number;
+  actualDistanceValue?: number;
+  actualDistanceUnit?: 'mi' | 'km' | 'm';
+  qualitativeLoadLabel?: string;
+  completed: boolean;
+  loggedAt: string;
+}
+
+export interface CompleteSessionRequest {
+  completedAt: string;
+  durationSeconds?: number;
+  totalSetsPlanned?: number;
+  totalSetsCompleted?: number;
 }

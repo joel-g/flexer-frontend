@@ -641,6 +641,90 @@ body {
   color: var(--color-text-primary);
 }
 
+/* Actual Performance Inputs */
+.actual-performance-inputs {
+  background: var(--color-bg-card-alt);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.actual-performance-inputs .input-row {
+  display: flex;
+  gap: 16px;
+}
+
+.actual-performance-inputs .input-group {
+  flex: 1;
+}
+
+.actual-performance-inputs label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.actual-performance-inputs input[type="number"] {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.actual-performance-inputs input[type="number"]::-webkit-outer-spin-button,
+.actual-performance-inputs input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.actual-performance-inputs input[type="number"]:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.actual-performance-inputs input[type="number"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.actual-performance-inputs .weight-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.actual-performance-inputs .weight-input-row input {
+  flex: 1;
+}
+
+.actual-performance-inputs .weight-input-row select {
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.actual-performance-inputs .weight-input-row select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.actual-performance-inputs .weight-input-row select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .set-actions {
   display: flex;
   gap: 12px;

@@ -25,6 +25,7 @@ export const workoutPlanTemplate: WorkoutPlan = {
               name: 'Push-ups',
               sets: 3,
               reps: '8-12', // Can be ranges, exact numbers, time, or AMRAP
+              loadType: 'bodyweight',
               weight: 'bodyweight', // 'bodyweight', 'light dumbbells', 'previous + 5 lbs', etc.
               restSeconds: 60,
               instructions: 'Keep straight line from head to heels, lower chest to floor',
@@ -35,6 +36,7 @@ export const workoutPlanTemplate: WorkoutPlan = {
               name: 'Bent-over Rows',
               sets: 3,
               reps: '10-12',
+              loadType: 'external_weight',
               weight: 'light dumbbells',
               restSeconds: 60,
               instructions: 'Hinge at hips, pull elbows back, squeeze shoulder blades'
@@ -53,6 +55,7 @@ export const workoutPlanTemplate: WorkoutPlan = {
               name: 'Squats',
               sets: 3,
               reps: '12-15',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 60,
               instructions: 'Feet hip-width apart, sit back, knees track over toes'
@@ -93,6 +96,7 @@ Requirements:
 
 For each exercise, include:
 - Sets and reps (can use ranges like "8-12" or time like "30 sec")
+- loadType: one of "external_weight", "bodyweight", "assisted", "band", "machine_level", "timed", "distance"
 - Weight recommendations (descriptive like "bodyweight", "light dumbbells", "challenging weight")
 - Rest periods in seconds
 - Clear form instructions

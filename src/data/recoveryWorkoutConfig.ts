@@ -24,6 +24,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Warm-up',
               sets: 1,
               reps: '5 min',
+              loadType: 'timed',
               weight: 'bodyweight',
               instructions: '5 minutes arm circles, band pull-aparts (15 reps), scapular wall slides (10 reps)'
             },
@@ -32,6 +33,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Incline Push-ups',
               sets: 3,
               reps: '12',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 60,
               instructions: 'Hands on bench, maintain straight line from head to heels'
@@ -41,6 +43,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Dumbbell Floor Press',
               sets: 3,
               reps: '10',
+              loadType: 'external_weight',
               weight: '50% perceived max',
               restSeconds: 90,
               instructions: 'Limits shoulder extension, control the movement'
@@ -50,6 +53,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Neutral Grip Dumbbell Rows',
               sets: 3,
               reps: '12 each arm',
+              loadType: 'external_weight',
               weight: 'light dumbbells',
               restSeconds: 60,
               instructions: 'Single arm, maintain neutral spine'
@@ -59,6 +63,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Band Face Pulls',
               sets: 3,
               reps: '15',
+              loadType: 'band',
               weight: 'Peloton bands',
               restSeconds: 45,
               instructions: 'Pull to face level, squeeze shoulder blades'
@@ -68,6 +73,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Dumbbell Lateral Raises',
               sets: 3,
               reps: '10',
+              loadType: 'external_weight',
               weight: 'very light',
               restSeconds: 60,
               instructions: 'Perfect form, control the movement, stop at shoulder height'
@@ -77,6 +83,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Band External Rotations',
               sets: 3,
               reps: '15 each arm',
+              loadType: 'band',
               weight: 'light band',
               restSeconds: 45,
               instructions: 'Keep elbow at side, rotate outward slowly'
@@ -94,6 +101,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Dead Bugs',
               sets: 3,
               reps: '12 each side',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 45,
               instructions: 'Keep lower back pressed to floor, slow controlled movement'
@@ -103,6 +111,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Plank',
               sets: 3,
               reps: '30-45 seconds',
+              loadType: 'timed',
               weight: 'bodyweight',
               restSeconds: 60,
               instructions: 'Straight line from head to heels, engage core'
@@ -112,6 +121,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Bird Dogs',
               sets: 3,
               reps: '10 each side',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 45,
               instructions: 'Opposite arm and leg, hold for 2 seconds'
@@ -121,6 +131,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Pallof Press',
               sets: 3,
               reps: '12 each side',
+              loadType: 'band',
               weight: 'bands',
               restSeconds: 60,
               instructions: 'Resist rotation, press straight out from chest'
@@ -130,6 +141,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Hollow Body Hold',
               sets: 3,
               reps: '20 seconds',
+              loadType: 'timed',
               weight: 'bodyweight',
               restSeconds: 45,
               instructions: 'Press lower back to floor, hold position'
@@ -139,6 +151,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Jump Box Step-ups',
               sets: 3,
               reps: '15 each leg',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 60,
               instructions: 'Step up with control, full hip extension at top'
@@ -148,6 +161,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Easy Run Finisher',
               sets: 1,
               reps: '20 minutes',
+              loadType: 'timed',
               weight: 'bodyweight',
               instructions: 'Easy pace, finish feeling refreshed'
             }
@@ -164,6 +178,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Goblet Squats',
               sets: 4,
               reps: '12',
+              loadType: 'external_weight',
               weight: 'single dumbbell',
               restSeconds: 90,
               instructions: 'Hold dumbbell at chest, squat below parallel'
@@ -173,6 +188,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Romanian Deadlifts',
               sets: 3,
               reps: '12',
+              loadType: 'external_weight',
               weight: 'dumbbells',
               restSeconds: 90,
               instructions: 'Hinge at hips, keep back straight, feel hamstring stretch'
@@ -182,6 +198,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Bulgarian Split Squats',
               sets: 3,
               reps: '10 each leg',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 60,
               instructions: 'Rear foot elevated, front leg does the work'
@@ -191,6 +208,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Jump Box Step-downs',
               sets: 3,
               reps: '10 each leg',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 60,
               instructions: 'Eccentric focus, control the descent slowly'
@@ -200,6 +218,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Single-Leg Glute Bridges',
               sets: 3,
               reps: '12 each leg',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 45,
               instructions: 'Squeeze glutes at top, hold for 1 second'
@@ -209,6 +228,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Standing Calf Raises',
               sets: 3,
               reps: '20',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 45,
               instructions: 'On box edge for full range of motion'
@@ -226,6 +246,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Active Recovery Day',
               sets: 1,
               reps: '30 minutes',
+              loadType: 'timed',
               weight: 'bodyweight',
               instructions: 'Light cardio, yoga, or easy walk. Keep it easy and listen to your body!'
             }
@@ -242,6 +263,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Push-ups',
               sets: 3,
               reps: '8-10',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 60,
               instructions: 'Modify on knees if needed, focus on perfect form'
@@ -251,6 +273,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Single-Arm Dumbbell Press',
               sets: 3,
               reps: '10 each arm',
+              loadType: 'external_weight',
               weight: 'light dumbbells',
               restSeconds: 60,
               instructions: 'On bench, unilateral loading for core stability'
@@ -260,6 +283,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Renegade Rows',
               sets: 3,
               reps: '8 each arm',
+              loadType: 'external_weight',
               weight: 'light dumbbells',
               restSeconds: 90,
               instructions: 'Plank position, row one arm at a time'
@@ -269,6 +293,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Band Pull-aparts',
               sets: 3,
               reps: '20',
+              loadType: 'band',
               weight: 'light band',
               restSeconds: 45,
               instructions: 'Keep arms straight, pull band apart at chest level'
@@ -278,6 +303,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Dumbbell Bicep Curls',
               sets: 3,
               reps: '12',
+              loadType: 'external_weight',
               weight: 'light dumbbells',
               restSeconds: 60,
               instructions: 'Control the negative, squeeze at the top'
@@ -287,6 +313,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Overhead Tricep Extension',
               sets: 3,
               reps: '10',
+              loadType: 'external_weight',
               weight: 'light weight',
               restSeconds: 60,
               instructions: 'Careful with shoulder position, start very light'
@@ -304,6 +331,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Bicycle Crunches',
               sets: 3,
               reps: '20',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 30,
               instructions: 'Controlled movement, bring elbow to opposite knee'
@@ -313,6 +341,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Russian Twists',
               sets: 3,
               reps: '20',
+              loadType: 'external_weight',
               weight: 'medicine ball',
               restSeconds: 30,
               instructions: 'Rotate side to side, keep core engaged'
@@ -322,6 +351,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Mountain Climbers',
               sets: 3,
               reps: '30 seconds',
+              loadType: 'timed',
               weight: 'bodyweight',
               restSeconds: 30,
               instructions: 'Fast alternating knees to chest from plank'
@@ -331,6 +361,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Side Plank',
               sets: 3,
               reps: '30 seconds each side',
+              loadType: 'timed',
               weight: 'bodyweight',
               restSeconds: 45,
               instructions: 'Hold straight line, stack shoulders and hips'
@@ -340,6 +371,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Medicine Ball Slams',
               sets: 3,
               reps: '15',
+              loadType: 'external_weight',
               weight: 'medicine ball',
               restSeconds: 60,
               instructions: 'Explosive slam down, engage entire core'
@@ -349,6 +381,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Lying Leg Raises',
               sets: 3,
               reps: '12',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 45,
               instructions: 'Keep lower back pressed to floor, control the movement'
@@ -366,6 +399,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Long Run or Complete Rest',
               sets: 1,
               reps: '45-60 minutes or rest',
+              loadType: 'timed',
               weight: 'bodyweight',
               instructions: 'Easy pace long run or take complete rest day - listen to your body'
             }
@@ -390,6 +424,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Incline Push-ups',
               sets: 3,
               reps: '15',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 60,
               instructions: 'Increase reps from Week 1, maintain perfect form'
@@ -399,6 +434,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Dumbbell Floor Press',
               sets: 3,
               reps: '12',
+              loadType: 'external_weight',
               weight: '55% perceived max',
               restSeconds: 90,
               instructions: 'Slight weight increase, maintain control'
@@ -408,6 +444,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Neutral Grip Dumbbell Rows',
               sets: 3,
               reps: '15 each arm',
+              loadType: 'external_weight',
               weight: 'light-moderate dumbbells',
               restSeconds: 60,
               instructions: 'Slight weight or rep increase'
@@ -417,6 +454,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Band Face Pulls',
               sets: 3,
               reps: '18',
+              loadType: 'band',
               weight: 'Peloton bands',
               restSeconds: 45,
               instructions: 'Increase reps, focus on quality movement'
@@ -426,6 +464,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Dumbbell Lateral Raises',
               sets: 3,
               reps: '12',
+              loadType: 'external_weight',
               weight: 'light weight',
               restSeconds: 60,
               instructions: 'Slight increase in reps or weight'
@@ -435,6 +474,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Band External Rotations',
               sets: 3,
               reps: '18 each arm',
+              loadType: 'band',
               weight: 'light band',
               restSeconds: 45,
               instructions: 'Increase reps, maintain control'
@@ -461,6 +501,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Standard Push-ups',
               sets: 3,
               reps: '12-15',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 60,
               instructions: 'Progress to full push-ups from incline'
@@ -470,6 +511,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Dumbbell Bench Press',
               sets: 4,
               reps: '10',
+              loadType: 'external_weight',
               weight: 'increase 10-15%',
               restSeconds: 90,
               instructions: 'Move to bench press with increased weight'
@@ -479,6 +521,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Single-Arm Dumbbell Rows',
               sets: 4,
               reps: '10 each arm',
+              loadType: 'external_weight',
               weight: 'moderate dumbbells',
               restSeconds: 60,
               instructions: 'Increase weight and add a set'
@@ -488,6 +531,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Incline Dumbbell Press',
               sets: 3,
               reps: '10',
+              loadType: 'external_weight',
               weight: 'moderate dumbbells',
               restSeconds: 90,
               instructions: 'New exercise - start moderate weight'
@@ -497,6 +541,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Face Pulls',
               sets: 3,
               reps: '15',
+              loadType: 'band',
               weight: 'bands or dumbbells',
               restSeconds: 45,
               instructions: 'Can progress to dumbbell rear delt flyes'
@@ -506,6 +551,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Lateral Raise Superset',
               sets: 3,
               reps: '12 each movement',
+              loadType: 'external_weight',
               weight: 'light-moderate',
               restSeconds: 90,
               instructions: 'Lateral raises immediately followed by front raises'
@@ -532,6 +578,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Push-ups',
               sets: 3,
               reps: '15-20',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 60,
               instructions: 'High rep range for endurance and definition'
@@ -541,6 +588,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Dumbbell Bench Press',
               sets: 4,
               reps: '8',
+              loadType: 'external_weight',
               weight: 'heavy',
               restSeconds: 120,
               instructions: 'Heavy weight, lower rep range for strength'
@@ -550,6 +598,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Incline Dumbbell Press',
               sets: 3,
               reps: '10',
+              loadType: 'external_weight',
               weight: 'moderate-heavy',
               restSeconds: 90,
               instructions: 'Focus on upper chest development'
@@ -559,6 +608,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Dumbbell Flyes',
               sets: 3,
               reps: '12',
+              loadType: 'external_weight',
               weight: 'light-moderate',
               restSeconds: 60,
               instructions: 'Control the stretch, focus on chest activation'
@@ -568,6 +618,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Bent-Over Dumbbell Rows',
               sets: 4,
               reps: '8',
+              loadType: 'external_weight',
               weight: 'heavy',
               restSeconds: 90,
               instructions: 'Heavy weight for back strength'
@@ -577,6 +628,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Face Pulls',
               sets: 4,
               reps: '20',
+              loadType: 'band',
               weight: 'moderate',
               restSeconds: 45,
               instructions: 'High reps for rear delt endurance'
@@ -586,6 +638,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Lateral Raise Drop Set',
               sets: 3,
               reps: '12 heavy + 12 medium + 12 light',
+              loadType: 'external_weight',
               weight: 'varied',
               restSeconds: 90,
               instructions: 'Start heavy, drop weight twice without rest'
@@ -612,6 +665,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Push-ups',
               sets: 4,
               reps: '20-25',
+              loadType: 'bodyweight',
               weight: 'bodyweight',
               restSeconds: 60,
               instructions: 'Peak rep range, perfect form throughout'
@@ -621,6 +675,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Dumbbell Bench Press',
               sets: 5,
               reps: '6-8',
+              loadType: 'external_weight',
               weight: 'heaviest manageable',
               restSeconds: 120,
               instructions: 'Peak strength - heaviest weight with good form'
@@ -630,6 +685,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Incline Dumbbell Press',
               sets: 4,
               reps: '8-10',
+              loadType: 'external_weight',
               weight: 'heavy',
               restSeconds: 90,
               instructions: 'Peak intensity for upper chest'
@@ -639,6 +695,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Dumbbell Flyes',
               sets: 4,
               reps: '10-12',
+              loadType: 'external_weight',
               weight: 'moderate',
               restSeconds: 60,
               instructions: 'Perfect form, maximum muscle activation'
@@ -648,6 +705,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Bent-Over Dumbbell Rows',
               sets: 5,
               reps: '6-8',
+              loadType: 'external_weight',
               weight: 'heaviest manageable',
               restSeconds: 120,
               instructions: 'Peak back strength development'
@@ -657,6 +715,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Face Pulls',
               sets: 4,
               reps: '25',
+              loadType: 'band',
               weight: 'moderate',
               restSeconds: 45,
               instructions: 'Maximum rear delt activation'
@@ -666,6 +725,7 @@ export const recoveryWorkoutPlan: WorkoutPlan = {
               name: 'Lateral Raise Complex',
               sets: 4,
               reps: 'See instructions',
+              loadType: 'external_weight',
               weight: 'varied',
               restSeconds: 120,
               instructions: '15 heavy lateral raises + 15 medium front raises + 15 light rear delt flyes'
