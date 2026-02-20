@@ -6,6 +6,16 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: '0.10.1',
+    date: 'February 20, 2026',
+    changes: [
+      'Improved reliability: set logs now retry automatically if they fail to save',
+      'Session resume now restores your exact position in the workout',
+      'Added support for mixed-type exercises with flexible metric selection',
+      'Security hardening for authentication',
+    ],
+  },
+  {
     version: '0.10.0',
     date: 'February 20, 2026',
     changes: [

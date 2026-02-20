@@ -79,11 +79,16 @@ import type {
   HistoryAnalytics,
   SessionListResponse,
   ConsistencyAnalytics,
+  SessionDetailResponse,
 } from '../types/workout';
 
 export const sessionApi = {
   async startSession(data: StartSessionRequest): Promise<ApiResponse<StartSessionResponse>> {
     return api.post('/sessions/start', data);
+  },
+
+  async getSessionDetail(sessionId: string): Promise<ApiResponse<SessionDetailResponse>> {
+    return api.get(`/sessions/${sessionId}`);
   },
 
   async upsertSetLog(sessionId: string, data: UpsertSetLogRequest): Promise<ApiResponse<{ setLogId: string }>> {

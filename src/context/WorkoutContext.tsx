@@ -1,8 +1,20 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
-import type { WorkoutProgress, WorkoutDay, WorkoutPlan, PlanResponse, LoadType, WeightUnit } from '../types/workout';
+import type { WorkoutProgress, WorkoutDay, WorkoutPlan, PlanResponse, LoadType, WeightUnit, UpsertSetLogRequest, WorkoutSetLog } from '../types/workout';
 import { useAuth } from '@clerk/clerk-react';
 import { api, sessionApi } from '../services/api';
+
+// Queue item for failed set logs
+interface QueuedSetLog {
+  sessionId: string;
+  request: UpsertSetLogRequest;
+  attempts: number;
+  lastAttempt: number;
+}
+
+const SET_LOG_QUEUE_KEY = 'flexer-set-log-queue';
+const MAX_RETRY_ATTEMPTS = 5;
+const RETRY_DELAY_MS = 5000;
 
 interface SetLogData {
   exerciseId: string;
@@ -30,6 +42,7 @@ interface WorkoutContextType {
   // Session state
   currentSessionId: string | null;
   sessionStartTime: Date | null;
+  resumedSetLogs: WorkoutSetLog[];
   // Navigation
   nextWorkout: () => void;
   previousWorkout: () => void;
@@ -79,9 +92,98 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
   // Session state
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
+  const [resumedSetLogs, setResumedSetLogs] = useState<WorkoutSetLog[]>([]);
 
   // Debounce timer for syncing to API
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Retry queue for failed set logs
+  const retryQueueRef = useRef<QueuedSetLog[]>([]);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load queued set logs from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(SET_LOG_QUEUE_KEY);
+      if (saved) {
+        retryQueueRef.current = JSON.parse(saved);
+        if (retryQueueRef.current.length > 0) {
+          processRetryQueue();
+        }
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }, []);
+
+  // Save queue to localStorage
+  const saveQueueToStorage = useCallback(() => {
+    try {
+      localStorage.setItem(SET_LOG_QUEUE_KEY, JSON.stringify(retryQueueRef.current));
+    } catch {
+      // Ignore storage errors
+    }
+  }, []);
+
+  // Process retry queue
+  const processRetryQueue = useCallback(async () => {
+    if (retryQueueRef.current.length === 0) return;
+
+    const now = Date.now();
+    const itemsToRetry = retryQueueRef.current.filter(
+      item => now - item.lastAttempt >= RETRY_DELAY_MS && item.attempts < MAX_RETRY_ATTEMPTS
+    );
+
+    for (const item of itemsToRetry) {
+      try {
+        const response = await sessionApi.upsertSetLog(item.sessionId, item.request);
+        if (response.success) {
+          // Remove from queue on success
+          retryQueueRef.current = retryQueueRef.current.filter(q => q !== item);
+          console.log('Retry succeeded for set log:', item.request.exerciseName, item.request.setNumber);
+        } else {
+          // Update attempt count
+          item.attempts++;
+          item.lastAttempt = now;
+          console.warn('Retry failed for set log:', item.request.exerciseName, `(attempt ${item.attempts})`);
+        }
+      } catch {
+        item.attempts++;
+        item.lastAttempt = now;
+      }
+    }
+
+    // Remove items that exceeded max attempts
+    const expiredItems = retryQueueRef.current.filter(item => item.attempts >= MAX_RETRY_ATTEMPTS);
+    if (expiredItems.length > 0) {
+      console.error('Set logs exceeded max retries and were dropped:', expiredItems.length);
+      retryQueueRef.current = retryQueueRef.current.filter(item => item.attempts < MAX_RETRY_ATTEMPTS);
+    }
+
+    saveQueueToStorage();
+
+    // Schedule next retry if queue still has items
+    if (retryQueueRef.current.length > 0) {
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = setTimeout(processRetryQueue, RETRY_DELAY_MS);
+    }
+  }, [saveQueueToStorage]);
+
+  // Add to retry queue
+  const addToRetryQueue = useCallback((sessionId: string, request: UpsertSetLogRequest) => {
+    retryQueueRef.current.push({
+      sessionId,
+      request,
+      attempts: 1,
+      lastAttempt: Date.now(),
+    });
+    saveQueueToStorage();
+
+    // Start retry timer if not already running
+    if (!retryTimerRef.current) {
+      retryTimerRef.current = setTimeout(processRetryQueue, RETRY_DELAY_MS);
+    }
+  }, [saveQueueToStorage, processRetryQueue]);
 
   // Set up API token getter
   useEffect(() => {
@@ -247,10 +349,28 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
       });
 
       if (response.success && response.data) {
-        setCurrentSessionId(response.data.sessionId);
+        const { sessionId, isResume } = response.data;
+        setCurrentSessionId(sessionId);
         setSessionStartTime(startTime);
-        console.log('Session started:', response.data.sessionId, response.data.isResume ? '(resumed)' : '(new)');
-        return response.data.sessionId;
+
+        // If resuming, fetch existing set logs to restore position
+        if (isResume) {
+          try {
+            const detailRes = await sessionApi.getSessionDetail(sessionId);
+            if (detailRes.success && detailRes.data?.setLogs) {
+              setResumedSetLogs(detailRes.data.setLogs);
+              console.log('Session resumed with', detailRes.data.setLogs.length, 'existing set logs');
+            }
+          } catch (err) {
+            console.warn('Failed to fetch set logs for resume:', err);
+            setResumedSetLogs([]);
+          }
+        } else {
+          setResumedSetLogs([]);
+        }
+
+        console.log('Session started:', sessionId, isResume ? '(resumed)' : '(new)');
+        return sessionId;
       } else {
         console.error('Failed to start session:', response.error);
         return null;
@@ -267,30 +387,34 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
       return;
     }
 
+    const request: UpsertSetLogRequest = {
+      exerciseId: data.exerciseId,
+      exerciseName: data.exerciseName,
+      loadType: data.loadType || 'external_weight',
+      setNumber: data.setNumber,
+      targetReps: data.targetReps,
+      targetWeight: data.targetWeight,
+      actualReps: data.actualReps,
+      actualWeightValue: data.actualWeightValue,
+      actualWeightUnit: data.actualWeightUnit,
+      actualDurationSeconds: data.actualDurationSeconds,
+      actualDistanceValue: data.actualDistanceValue,
+      actualDistanceUnit: data.actualDistanceUnit,
+      qualitativeLoadLabel: data.qualitativeLoadLabel,
+      completed: true,
+      loggedAt: new Date().toISOString(),
+    };
+
     try {
-      const response = await sessionApi.upsertSetLog(currentSessionId, {
-        exerciseId: data.exerciseId,
-        exerciseName: data.exerciseName,
-        loadType: data.loadType || 'external_weight',
-        setNumber: data.setNumber,
-        targetReps: data.targetReps,
-        targetWeight: data.targetWeight,
-        actualReps: data.actualReps,
-        actualWeightValue: data.actualWeightValue,
-        actualWeightUnit: data.actualWeightUnit,
-        actualDurationSeconds: data.actualDurationSeconds,
-        actualDistanceValue: data.actualDistanceValue,
-        actualDistanceUnit: data.actualDistanceUnit,
-        qualitativeLoadLabel: data.qualitativeLoadLabel,
-        completed: true,
-        loggedAt: new Date().toISOString(),
-      });
+      const response = await sessionApi.upsertSetLog(currentSessionId, request);
 
       if (!response.success) {
-        console.error('Failed to log set:', response.error);
+        console.error('Failed to log set, adding to retry queue:', response.error);
+        addToRetryQueue(currentSessionId, request);
       }
     } catch (err) {
-      console.error('Error logging set:', err);
+      console.error('Error logging set, adding to retry queue:', err);
+      addToRetryQueue(currentSessionId, request);
     }
   };
 
@@ -322,6 +446,7 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
       // Clear session state regardless of API result
       setCurrentSessionId(null);
       setSessionStartTime(null);
+      setResumedSetLogs([]);
     }
   };
 
@@ -380,6 +505,7 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
       error,
       currentSessionId,
       sessionStartTime,
+      resumedSetLogs,
       nextWorkout,
       previousWorkout,
       completeCurrentWorkout,

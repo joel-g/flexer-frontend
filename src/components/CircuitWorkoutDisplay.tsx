@@ -41,6 +41,7 @@ export const CircuitWorkoutDisplay: React.FC = () => {
     startWorkoutSession,
     logSetCompletion,
     endWorkoutSession,
+    resumedSetLogs,
   } = useWorkout();
 
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
@@ -66,6 +67,15 @@ export const CircuitWorkoutDisplay: React.FC = () => {
   useEffect(() => {
     sessionStartedRef.current = false;
     setCompletedSetsCount(0);
+    setCurrentSetIndex(0);
+  }, [currentWorkout?.id]);
+
+  // Ref to track if resume has been applied
+  const resumeAppliedRef = useRef(false);
+
+  // Reset resume flag when workout changes
+  useEffect(() => {
+    resumeAppliedRef.current = false;
   }, [currentWorkout?.id]);
 
   // Generate flat array of all sets in circuit order
@@ -91,6 +101,43 @@ export const CircuitWorkoutDisplay: React.FC = () => {
 
     return sets;
   }, [currentWorkout]);
+
+  // Restore position from resumed set logs (must be after workoutSets memo)
+  useEffect(() => {
+    // Only apply resume once per session, when we have both set logs and workout sets
+    if (resumedSetLogs.length > 0 && workoutSets.length > 0 && !resumeAppliedRef.current) {
+      resumeAppliedRef.current = true;
+
+      // Build a set of completed (exerciseId, setNumber) pairs from resumed logs
+      const completedPairs = new Set(
+        resumedSetLogs
+          .filter(log => log.completed)
+          .map(log => `${log.exerciseId}:${log.setNumber}`)
+      );
+
+      // Find the first set that hasn't been completed
+      let resumeIndex = workoutSets.length; // Default to end if all completed
+      for (let i = 0; i < workoutSets.length; i++) {
+        const key = `${workoutSets[i].exercise.id}:${workoutSets[i].setNumber}`;
+        if (!completedPairs.has(key)) {
+          resumeIndex = i;
+          break;
+        }
+      }
+
+      // Restore state
+      const completedCount = completedPairs.size;
+      console.log(`Resuming workout: ${completedCount} sets completed, starting at set ${resumeIndex + 1}`);
+
+      setCompletedSetsCount(completedCount);
+      setCurrentSetIndex(resumeIndex);
+
+      // If all sets were completed, mark workout as completed
+      if (resumeIndex >= workoutSets.length) {
+        setWorkoutState('completed');
+      }
+    }
+  }, [resumedSetLogs, workoutSets]);
 
   // Show loading state
   if (loading) {

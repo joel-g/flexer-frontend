@@ -65,12 +65,23 @@ export const SetDisplay: React.FC<SetDisplayProps> = ({
 
   const loadType = getLoadType();
 
+  // For mixed load type, user selects their primary metric
+  type MixedMetricType = 'reps_weight' | 'reps_only' | 'timed' | 'distance';
+  const [mixedMetricType, setMixedMetricType] = useState<MixedMetricType>('reps_weight');
+
   // Determine which inputs to show based on loadType
-  const showWeightInput = loadType === 'external_weight' || loadType === 'assisted';
-  const showBandInput = loadType === 'band';
-  const showMachineLevelInput = loadType === 'machine_level';
-  const showDurationInput = loadType === 'timed';
-  const showDistanceInput = loadType === 'distance';
+  const isMixed = loadType === 'mixed';
+  const effectiveLoadType = isMixed
+    ? (mixedMetricType === 'timed' ? 'timed' :
+       mixedMetricType === 'distance' ? 'distance' :
+       mixedMetricType === 'reps_only' ? 'bodyweight' : 'external_weight')
+    : loadType;
+
+  const showWeightInput = effectiveLoadType === 'external_weight' || effectiveLoadType === 'assisted';
+  const showBandInput = effectiveLoadType === 'band';
+  const showMachineLevelInput = effectiveLoadType === 'machine_level';
+  const showDurationInput = effectiveLoadType === 'timed';
+  const showDistanceInput = effectiveLoadType === 'distance';
   const showRepsInput = !showDurationInput && !showDistanceInput;
 
   // Parse duration for timed exercises (e.g., "30 seconds", "45s")
@@ -201,6 +212,47 @@ export const SetDisplay: React.FC<SetDisplayProps> = ({
 
         {/* Actual performance inputs */}
         <div className="actual-performance-inputs">
+          {/* Mixed load type selector */}
+          {isMixed && (
+            <div className="mixed-metric-selector">
+              <label>What are you tracking?</label>
+              <div className="metric-options">
+                <button
+                  type="button"
+                  className={`metric-option ${mixedMetricType === 'reps_weight' ? 'active' : ''}`}
+                  onClick={() => setMixedMetricType('reps_weight')}
+                  disabled={isCompleted}
+                >
+                  Reps + Weight
+                </button>
+                <button
+                  type="button"
+                  className={`metric-option ${mixedMetricType === 'reps_only' ? 'active' : ''}`}
+                  onClick={() => setMixedMetricType('reps_only')}
+                  disabled={isCompleted}
+                >
+                  Reps Only
+                </button>
+                <button
+                  type="button"
+                  className={`metric-option ${mixedMetricType === 'timed' ? 'active' : ''}`}
+                  onClick={() => setMixedMetricType('timed')}
+                  disabled={isCompleted}
+                >
+                  Duration
+                </button>
+                <button
+                  type="button"
+                  className={`metric-option ${mixedMetricType === 'distance' ? 'active' : ''}`}
+                  onClick={() => setMixedMetricType('distance')}
+                  disabled={isCompleted}
+                >
+                  Distance
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="input-row">
             {/* Reps input (for most exercises except timed/distance) */}
             {showRepsInput && (

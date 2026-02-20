@@ -725,6 +725,55 @@ body {
   cursor: not-allowed;
 }
 
+/* Mixed load type selector */
+.mixed-metric-selector {
+  margin-bottom: 16px;
+}
+
+.mixed-metric-selector > label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.metric-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.metric-option {
+  flex: 1;
+  min-width: calc(50% - 4px);
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-card);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.metric-option:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.metric-option.active {
+  background: var(--gradient-primary);
+  border-color: transparent;
+  color: var(--color-text-inverse);
+}
+
+.metric-option:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .set-actions {
   display: flex;
   gap: 12px;

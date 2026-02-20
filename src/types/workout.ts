@@ -5,7 +5,8 @@ export type ExerciseLoadType =
   | 'band'
   | 'machine_level'
   | 'timed'
-  | 'distance';
+  | 'distance'
+  | 'mixed';
 
 export interface Exercise {
   id: string;
@@ -153,8 +154,17 @@ export interface WorkoutSetLog {
   actualReps?: number;
   actualWeightValue?: number;
   actualWeightUnit?: WeightUnit;
+  actualDurationSeconds?: number;
+  actualDistanceValue?: number;
+  actualDistanceUnit?: 'mi' | 'km' | 'm';
+  qualitativeLoadLabel?: string;
   completed: boolean;
   loggedAt: string;
+}
+
+export interface SessionDetailResponse {
+  session: WorkoutSession;
+  setLogs: WorkoutSetLog[];
 }
 
 export interface StartSessionRequest {
@@ -254,6 +264,8 @@ export interface SessionListResponse {
 
 // ===== Consistency/Streak Analytics Types =====
 
+export type ConsistencySourceTier = 'session_derived' | 'legacy_fallback';
+
 export interface ConsistencyScoreComponents {
   adherenceRate: number;      // 0-1
   streakStrength: number;     // 0-1
@@ -271,4 +283,5 @@ export interface ConsistencyAnalytics {
   previousPeriodScore: number | null;
   delta: number | null;
   components: ConsistencyScoreComponents;
+  sourceTier: ConsistencySourceTier;
 }
