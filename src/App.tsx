@@ -7,6 +7,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { WorkoutPage } from './pages/WorkoutPage';
 import { PlanOverviewPage } from './pages/PlanOverviewPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { HistoryPage } from './pages/HistoryPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import './App.css';
@@ -53,6 +54,7 @@ function AppRoutes() {
         <Route path="/workout" element={<WorkoutPage />} />
         <Route path="/plan" element={<PlanOverviewPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/history" element={<HistoryPage />} />
       </Route>
 
       {/* Catch-all redirect */}

@@ -196,3 +196,58 @@ export interface CompleteSessionRequest {
   totalSetsPlanned?: number;
   totalSetsCompleted?: number;
 }
+
+// ===== History/Analytics Types =====
+
+export type MetricTier = 'core' | 'enhanced';
+
+export interface WeeklyCompletionPoint {
+  weekStart: string;
+  completed: number;
+}
+
+export interface HistoryAnalyticsSummary {
+  totalCompleted: number;
+  estimatedTotalSets: number | null;
+  completionRate: number | null;
+  currentStreakDays: number;
+  longestStreakDays: number;
+  actualTotalVolume: number | null;
+}
+
+export interface WeekOverWeek {
+  thisWeekCompleted: number;
+  lastWeekCompleted: number;
+  delta: number;
+}
+
+export interface HistoryAnalytics {
+  metricTier: MetricTier;
+  range: {
+    from: string;
+    to: string;
+    days: number;
+  };
+  summary: HistoryAnalyticsSummary;
+  weeklySeries: WeeklyCompletionPoint[];
+  weekOverWeek: WeekOverWeek;
+}
+
+export interface SessionListItem {
+  id: string;
+  workoutDayId: string;
+  workoutName: string;
+  weekNumber: number;
+  dayNumber: number;
+  status: string;
+  startedAt: string;
+  completedAt?: string;
+  durationSeconds?: number;
+  totalExercises?: number;
+  totalSetsCompleted?: number;
+}
+
+export interface SessionListResponse {
+  items: SessionListItem[];
+  nextCursor: string | null;
+}

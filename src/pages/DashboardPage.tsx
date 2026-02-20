@@ -150,6 +150,9 @@ export function DashboardPage() {
       )}
 
       <section className="quick-actions">
+        <button onClick={() => navigate('/history')} className="btn btn-secondary">
+          View History
+        </button>
         <button onClick={() => navigate('/plan')} className="btn btn-secondary">
           View Full Plan
         </button>

@@ -6,6 +6,16 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: '0.9.0',
+    date: 'February 19, 2026',
+    changes: [
+      'Workout History page with analytics dashboard',
+      'Track streaks, completion rate, and total volume',
+      'Weekly activity chart showing workout trends',
+      'View past workouts with duration and set counts',
+    ],
+  },
+  {
     version: '0.8.0',
     date: 'February 13, 2026',
     changes: [

@@ -76,6 +76,8 @@ import type {
   StartSessionResponse,
   UpsertSetLogRequest,
   CompleteSessionRequest,
+  HistoryAnalytics,
+  SessionListResponse,
 } from '../types/workout';
 
 export const sessionApi = {
@@ -89,5 +91,32 @@ export const sessionApi = {
 
   async completeSession(sessionId: string, data: CompleteSessionRequest): Promise<ApiResponse<{ sessionId: string; status: string }>> {
     return api.post(`/sessions/${sessionId}/complete`, data);
+  },
+};
+
+export const historyApi = {
+  async getAnalytics(rangeDays = 56, planId?: string): Promise<ApiResponse<HistoryAnalytics>> {
+    let path = `/history/analytics?rangeDays=${rangeDays}`;
+    if (planId) path += `&planId=${planId}`;
+    return api.get(path);
+  },
+
+  async listSessions(
+    options: {
+      limit?: number;
+      cursor?: string;
+      planId?: string;
+      from?: string;
+      to?: string;
+    } = {}
+  ): Promise<ApiResponse<SessionListResponse>> {
+    const params = new URLSearchParams();
+    if (options.limit) params.set('limit', String(options.limit));
+    if (options.cursor) params.set('cursor', options.cursor);
+    if (options.planId) params.set('planId', options.planId);
+    if (options.from) params.set('from', options.from);
+    if (options.to) params.set('to', options.to);
+    const queryString = params.toString();
+    return api.get(`/history${queryString ? `?${queryString}` : ''}`);
   },
 };
