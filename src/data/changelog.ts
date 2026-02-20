@@ -6,6 +6,16 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: '0.10.0',
+    date: 'February 20, 2026',
+    changes: [
+      'Consistency Score: see your 0-100 adherence score on the dashboard',
+      'Score breakdown showing adherence rate, streak strength, and recency bonus',
+      'Track score changes vs previous period',
+      'Streak display on dashboard with personal best',
+    ],
+  },
+  {
     version: '0.9.0',
     date: 'February 19, 2026',
     changes: [

@@ -251,3 +251,24 @@ export interface SessionListResponse {
   items: SessionListItem[];
   nextCursor: string | null;
 }
+
+// ===== Consistency/Streak Analytics Types =====
+
+export interface ConsistencyScoreComponents {
+  adherenceRate: number;      // 0-1
+  streakStrength: number;     // 0-1
+  recencyBonus: number;       // 0-1
+  scheduledWorkouts: number;
+  completedWorkouts: number;
+}
+
+export interface ConsistencyAnalytics {
+  asOf: string;
+  rangeDays: number;
+  currentStreakDays: number;
+  longestStreakDays: number;
+  consistencyScore: number;   // 0-100
+  previousPeriodScore: number | null;
+  delta: number | null;
+  components: ConsistencyScoreComponents;
+}

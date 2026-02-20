@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { historyApi } from '../services/api';
+import { historyApi, analyticsApi } from '../services/api';
 import { ResponsiveLayout } from '../components/ResponsiveLayout';
-import type { HistoryAnalytics, SessionListItem } from '../types/workout';
+import type { HistoryAnalytics, SessionListItem, ConsistencyAnalytics } from '../types/workout';
 import './HistoryPage.css';
 
 type RangeOption = 28 | 56 | 84;
@@ -10,21 +10,24 @@ type RangeOption = 28 | 56 | 84;
 export function HistoryPage() {
   const navigate = useNavigate();
   const [analytics, setAnalytics] = useState<HistoryAnalytics | null>(null);
+  const [consistency, setConsistency] = useState<ConsistencyAnalytics | null>(null);
   const [sessions, setSessions] = useState<SessionListItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rangeDays, setRangeDays] = useState<RangeOption>(56);
+  const [showScoreBreakdown, setShowScoreBreakdown] = useState(false);
 
   const loadData = useCallback(async (range: RangeOption) => {
     try {
       setLoading(true);
       setError(null);
 
-      const [analyticsRes, sessionsRes] = await Promise.all([
+      const [analyticsRes, sessionsRes, consistencyRes] = await Promise.all([
         historyApi.getAnalytics(range),
         historyApi.listSessions({ limit: 10 }),
+        analyticsApi.getConsistency(28),
       ]);
 
       if (analyticsRes.success && analyticsRes.data) {
@@ -36,6 +39,10 @@ export function HistoryPage() {
       if (sessionsRes.success && sessionsRes.data) {
         setSessions(sessionsRes.data.items);
         setNextCursor(sessionsRes.data.nextCursor);
+      }
+
+      if (consistencyRes.success && consistencyRes.data) {
+        setConsistency(consistencyRes.data);
       }
     } catch (err) {
       setError('Failed to load history data');
@@ -234,6 +241,89 @@ export function HistoryPage() {
           <section className="longest-streak">
             <span className="streak-label">Longest streak:</span>
             <span className="streak-value">{analytics.summary.longestStreakDays} days</span>
+          </section>
+        )}
+
+        {/* Consistency Score Breakdown */}
+        {consistency && (
+          <section className="consistency-breakdown">
+            <button
+              className="breakdown-toggle"
+              onClick={() => setShowScoreBreakdown(!showScoreBreakdown)}
+            >
+              <div className="breakdown-toggle-content">
+                <span className="breakdown-label">Consistency Score</span>
+                <span className="breakdown-score">{consistency.consistencyScore}/100</span>
+              </div>
+              <span className="breakdown-chevron">{showScoreBreakdown ? '▲' : '▼'}</span>
+            </button>
+            {showScoreBreakdown && (
+              <div className="breakdown-details">
+                <div className="breakdown-item">
+                  <div className="breakdown-item-header">
+                    <span className="breakdown-item-label">Adherence Rate</span>
+                    <span className="breakdown-item-value">
+                      {Math.round(consistency.components.adherenceRate * 100)}%
+                    </span>
+                  </div>
+                  <div className="breakdown-bar">
+                    <div
+                      className="breakdown-bar-fill"
+                      style={{ width: `${consistency.components.adherenceRate * 100}%` }}
+                    />
+                  </div>
+                  <span className="breakdown-item-detail">
+                    {consistency.components.completedWorkouts} of {consistency.components.scheduledWorkouts} workouts (60% weight)
+                  </span>
+                </div>
+                <div className="breakdown-item">
+                  <div className="breakdown-item-header">
+                    <span className="breakdown-item-label">Streak Strength</span>
+                    <span className="breakdown-item-value">
+                      {Math.round(consistency.components.streakStrength * 100)}%
+                    </span>
+                  </div>
+                  <div className="breakdown-bar">
+                    <div
+                      className="breakdown-bar-fill"
+                      style={{ width: `${consistency.components.streakStrength * 100}%` }}
+                    />
+                  </div>
+                  <span className="breakdown-item-detail">
+                    {consistency.currentStreakDays} day streak / 7 day goal (25% weight)
+                  </span>
+                </div>
+                <div className="breakdown-item">
+                  <div className="breakdown-item-header">
+                    <span className="breakdown-item-label">Recency Bonus</span>
+                    <span className="breakdown-item-value">
+                      {Math.round(consistency.components.recencyBonus * 100)}%
+                    </span>
+                  </div>
+                  <div className="breakdown-bar">
+                    <div
+                      className="breakdown-bar-fill"
+                      style={{ width: `${consistency.components.recencyBonus * 100}%` }}
+                    />
+                  </div>
+                  <span className="breakdown-item-detail">
+                    {consistency.components.recencyBonus === 1
+                      ? 'Worked out recently'
+                      : consistency.components.recencyBonus > 0
+                      ? 'A few days since last workout'
+                      : 'No recent workouts'} (15% weight)
+                  </span>
+                </div>
+                {consistency.delta !== null && consistency.delta !== 0 && (
+                  <div className="breakdown-delta">
+                    <span className={consistency.delta > 0 ? 'positive' : 'negative'}>
+                      {consistency.delta > 0 ? '+' : ''}{consistency.delta} points
+                    </span>
+                    {' '}vs previous period
+                  </div>
+                )}
+              </div>
+            )}
           </section>
         )}
 

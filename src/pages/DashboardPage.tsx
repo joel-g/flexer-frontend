@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
+import { analyticsApi } from '../services/api';
 import { changelog } from '../data/changelog';
 import { ResponsiveLayout } from '../components/ResponsiveLayout';
-import type { PlanResponse, WorkoutProgress, WorkoutDay } from '../types/workout';
+import type { PlanResponse, WorkoutProgress, WorkoutDay, ConsistencyAnalytics } from '../types/workout';
 
 export function DashboardPage() {
   const api = useApi();
   const navigate = useNavigate();
   const [plan, setPlan] = useState<PlanResponse | null>(null);
   const [progress, setProgress] = useState<WorkoutProgress | null>(null);
+  const [consistency, setConsistency] = useState<ConsistencyAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [changelogOpen, setChangelogOpen] = useState(false);
@@ -39,6 +41,12 @@ export function DashboardPage() {
       const progressRes = await api.get<WorkoutProgress>('/progress');
       if (progressRes.success && progressRes.data) {
         setProgress(progressRes.data);
+      }
+
+      // Load consistency analytics
+      const consistencyRes = await analyticsApi.getConsistency(28);
+      if (consistencyRes.success && consistencyRes.data) {
+        setConsistency(consistencyRes.data);
       }
     } catch (err) {
       setError('Failed to load data');
@@ -129,6 +137,45 @@ export function DashboardPage() {
           </div>
         </div>
       </section>
+
+      {consistency && (
+        <section className="consistency-section">
+          <div className="consistency-header">
+            <h3>Your Consistency</h3>
+            <span className="consistency-period">Last 28 days</span>
+          </div>
+          <div className="consistency-cards">
+            <div className="consistency-score-card">
+              <div
+                className="score-circle"
+                style={{
+                  background: `conic-gradient(
+                    var(--color-primary) ${consistency.consistencyScore * 3.6}deg,
+                    var(--color-border) 0deg
+                  )`
+                }}
+              >
+                <div className="score-inner">
+                  <span className="score-value">{consistency.consistencyScore}</span>
+                </div>
+              </div>
+              <span className="consistency-label">Score</span>
+              {consistency.delta !== null && consistency.delta !== 0 && (
+                <span className={`consistency-delta ${consistency.delta > 0 ? 'positive' : 'negative'}`}>
+                  {consistency.delta > 0 ? '+' : ''}{consistency.delta}
+                </span>
+              )}
+            </div>
+            <div className="streak-card">
+              <span className="streak-value">{consistency.currentStreakDays}</span>
+              <span className="streak-label">Day Streak</span>
+              {consistency.longestStreakDays > consistency.currentStreakDays && (
+                <span className="streak-best">Best: {consistency.longestStreakDays}</span>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {currentWorkout && (
         <section className="next-workout">

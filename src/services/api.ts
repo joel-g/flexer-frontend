@@ -78,6 +78,7 @@ import type {
   CompleteSessionRequest,
   HistoryAnalytics,
   SessionListResponse,
+  ConsistencyAnalytics,
 } from '../types/workout';
 
 export const sessionApi = {
@@ -118,5 +119,13 @@ export const historyApi = {
     if (options.to) params.set('to', options.to);
     const queryString = params.toString();
     return api.get(`/history${queryString ? `?${queryString}` : ''}`);
+  },
+};
+
+export const analyticsApi = {
+  async getConsistency(rangeDays = 28, planId?: string): Promise<ApiResponse<ConsistencyAnalytics>> {
+    const params = new URLSearchParams({ rangeDays: String(rangeDays) });
+    if (planId) params.set('planId', planId);
+    return api.get(`/analytics/consistency?${params}`);
   },
 };

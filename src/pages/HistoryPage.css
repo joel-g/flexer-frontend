@@ -341,3 +341,120 @@
   width: 100%;
   margin-top: 8px;
 }
+
+/* Consistency Breakdown */
+.consistency-breakdown {
+  background: var(--color-bg-card);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid var(--color-border-light);
+  overflow: hidden;
+}
+
+.breakdown-toggle {
+  width: 100%;
+  padding: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+}
+
+.breakdown-toggle:hover {
+  background: var(--color-bg-card-alt);
+}
+
+.breakdown-toggle-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.breakdown-label {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.breakdown-score {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.breakdown-chevron {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.breakdown-details {
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.breakdown-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.breakdown-item:last-of-type {
+  border-bottom: none;
+}
+
+.breakdown-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.breakdown-item-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.breakdown-item-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.breakdown-bar {
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.breakdown-bar-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.breakdown-item-detail {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.breakdown-delta {
+  padding-top: 12px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.breakdown-delta .positive {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.breakdown-delta .negative {
+  color: var(--color-error);
+  font-weight: 600;
+}

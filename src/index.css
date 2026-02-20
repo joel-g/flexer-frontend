@@ -1613,6 +1613,127 @@ body {
   color: var(--color-text-muted);
 }
 
+/* ===== Consistency Section ===== */
+.consistency-section {
+  background: var(--color-bg-card);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.consistency-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.consistency-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+}
+
+.consistency-period {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.consistency-cards {
+  display: flex;
+  gap: 20px;
+}
+
+.consistency-score-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  background: var(--color-bg-card-alt);
+  border-radius: 12px;
+}
+
+.score-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.score-inner {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.consistency-label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.consistency-delta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.consistency-delta.positive {
+  background: rgba(72, 187, 120, 0.15);
+  color: var(--color-success);
+}
+
+.consistency-delta.negative {
+  background: rgba(229, 62, 62, 0.15);
+  color: var(--color-error);
+}
+
+.streak-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--color-bg-card-alt);
+  border-radius: 12px;
+}
+
+.streak-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.streak-label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+.streak-best {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 8px;
+}
+
 .no-plan {
   text-align: center;
   padding: 60px 20px;
