@@ -307,7 +307,7 @@ export const CircuitWorkoutDisplay: React.FC = () => {
   if (workoutState === 'finishing') {
     return <div className="completion-screen">
       <h2>{isSaving ? 'Saving your workout...' : 'Finish your workout'}</h2>
-      <p>{saveError || syncMessage || 'Your sets are logged. Confirm completion to save this workout.'}</p>
+      <p role="status">{saveError || syncMessage || 'Your sets are logged. Confirm completion to save this workout.'}</p>
       <button className="btn btn-primary" disabled={isSaving} onClick={() => { void finishWorkout(completedSetsCount); }}>
         {isSaving ? 'Saving...' : 'Save Completed Workout'}
       </button>
@@ -429,7 +429,7 @@ export const CircuitWorkoutDisplay: React.FC = () => {
       {/* Show what's coming next */}
       {!isLastSet && (
         <div className="next-set-preview">
-          <h4>Next up:</h4>
+          <h3>Next up</h3>
           <p>
             {workoutSets[currentSetIndex + 1].exercise.name} - 
             Set {workoutSets[currentSetIndex + 1].setNumber} of {workoutSets[currentSetIndex + 1].exercise.sets}

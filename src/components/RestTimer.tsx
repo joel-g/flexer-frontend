@@ -1,104 +1,30 @@
-import React, { useState, useEffect } from 'react';
-
-interface NextExerciseInfo {
-  name: string;
-  setNumber: number;
-  totalSets: number;
-  reps: string;
-  weight?: string;
-}
-
-interface RestTimerProps {
-  restSeconds: number;
-  onComplete: () => void;
-  onSkip: () => void;
-  nextExercise?: NextExerciseInfo;
-}
-
-export const RestTimer: React.FC<RestTimerProps> = ({ restSeconds, onComplete, onSkip, nextExercise }) => {
-  const [timeLeft, setTimeLeft] = useState(restSeconds);
-  const [isActive, setIsActive] = useState(true);
-
+import { useEffect, useRef, useState } from 'react';
+interface NextExerciseInfo { name: string; setNumber: number; totalSets: number; reps: string; weight?: string }
+interface RestTimerProps { restSeconds: number; onComplete: () => void; onSkip: () => void; nextExercise?: NextExerciseInfo }
+export function RestTimer({ restSeconds, onComplete, onSkip, nextExercise }: RestTimerProps) {
+  const [remaining, setRemaining] = useState(restSeconds);
+  const [deadline, setDeadline] = useState(() => Date.now() + restSeconds * 1000);
+  const [paused, setPaused] = useState(false);
+  const title = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { title.current?.focus(); }, []);
   useEffect(() => {
-    if (!isActive || timeLeft <= 0) return;
-
-    const interval = setInterval(() => {
-      setTimeLeft(time => {
-        if (time <= 1) {
-          setIsActive(false);
-          onComplete();
-          return 0;
-        }
-        return time - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isActive, timeLeft, onComplete]);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    if (paused) return;
+    const tick = () => setRemaining(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
+    const interval = window.setInterval(tick, 250);
+    return () => window.clearInterval(interval);
+  }, [deadline, paused]);
+  const ready = remaining === 0;
+  const togglePause = () => { if (paused) setDeadline(Date.now() + remaining * 1000); setPaused(!paused); };
+  const extend = () => {
+    const next = (paused ? remaining : Math.max(0, Math.ceil((deadline - Date.now()) / 1000))) + 15;
+    setRemaining(next); setDeadline(Date.now() + next * 1000);
   };
-
-  const getTimerColor = () => {
-    const percentage = timeLeft / restSeconds;
-    if (percentage > 0.6) return '#48bb78'; // Green
-    if (percentage > 0.3) return '#ed8936'; // Orange
-    return '#e53e3e'; // Red
-  };
-
-  const pauseTimer = () => setIsActive(false);
-  const resumeTimer = () => setIsActive(true);
-
-  return (
-    <div className="rest-timer">
-      <div className="rest-timer-header">
-        <h3>Rest Time</h3>
-        <button className="btn btn-secondary" onClick={onSkip}>
-          Skip Rest
-        </button>
-      </div>
-      
-      <div 
-        className="rest-timer-display"
-        style={{ color: getTimerColor() }}
-      >
-        {formatTime(timeLeft)}
-      </div>
-      
-      <div className="rest-timer-controls">
-        {isActive ? (
-          <button className="btn btn-secondary" onClick={pauseTimer}>
-            ⏸️ Pause
-          </button>
-        ) : timeLeft > 0 ? (
-          <button className="btn btn-primary" onClick={resumeTimer}>
-            ▶️ Resume
-          </button>
-        ) : (
-          <button className="btn btn-success" onClick={onComplete}>
-            Continue →
-          </button>
-        )}
-      </div>
-      
-      {nextExercise && (
-        <div className="rest-up-next">
-          <p className="rest-up-next-label">Up Next</p>
-          <p className="rest-up-next-name">{nextExercise.name}</p>
-          <p className="rest-up-next-details">
-            Set {nextExercise.setNumber} of {nextExercise.totalSets}
-            {' · '}{nextExercise.reps} reps
-            {nextExercise.weight && <> · {nextExercise.weight}</>}
-          </p>
-        </div>
-      )}
-
-      <div className="rest-suggestions">
-        <p>💡 Use this time to hydrate and prepare for the next set</p>
-      </div>
-    </div>
-  );
-};
+  return <section className="rest-timer" aria-labelledby="rest-title">
+    <div className="rest-timer-header"><h2 id="rest-title" ref={title} tabIndex={-1}>{ready ? 'Ready when you are' : paused ? 'Rest paused' : 'Take a breather'}</h2></div>
+    <div className="rest-timer-display" role="timer" aria-label={`${remaining} seconds remaining`}>{Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}</div>
+    <p role="status">{ready ? 'Rest complete. Continue when you feel ready.' : 'Your set is logged. Prepare for the next one.'}</p>
+    <div className="rest-timer-controls"><button className="btn btn-secondary" disabled={ready} onClick={togglePause}>{paused ? 'Resume' : 'Pause'}</button><button className="btn btn-secondary" onClick={extend}>+15 seconds</button></div>
+    {nextExercise && <div className="rest-up-next"><p className="rest-up-next-label">Up next · Set {nextExercise.setNumber} of {nextExercise.totalSets}</p><h3 className="rest-up-next-name">{nextExercise.name}</h3><p className="rest-up-next-details">{nextExercise.reps}{nextExercise.weight ? ` · ${nextExercise.weight}` : ''}</p></div>}
+    <button className="btn btn-primary" onClick={ready ? onComplete : onSkip}>{ready ? 'Continue workout' : 'Skip rest'}</button>
+  </section>;
+}

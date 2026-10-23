@@ -104,7 +104,7 @@ export function HistoryPage() {
     return (
       <ResponsiveLayout>
         <div className="history-page">
-          <div className="loading-spinner">Loading history...</div>
+          <div className="loading-spinner" role="status">Loading history...</div>
         </div>
       </ResponsiveLayout>
     );
@@ -114,7 +114,7 @@ export function HistoryPage() {
     return (
       <ResponsiveLayout>
         <div className="history-page">
-          <div className="error-message">{error}</div>
+          <div className="error-message" role="alert">{error}</div>
           <button onClick={() => loadData(rangeDays)} className="btn btn-secondary">
             Try Again
           </button>
@@ -143,7 +143,7 @@ export function HistoryPage() {
             <button
               key={range}
               onClick={() => handleRangeChange(range)}
-              className={`range-btn ${rangeDays === range ? 'active' : ''}`}
+              aria-pressed={rangeDays === range} aria-label={`${range / 7} weeks`} className={`range-btn ${rangeDays === range ? 'active' : ''}`}
             >
               {range / 7}w
             </button>
@@ -181,7 +181,7 @@ export function HistoryPage() {
         {/* Week over Week */}
         {analytics && (
           <section className="week-over-week">
-            <h3>This Week</h3>
+            <h2>This Week</h2>
             <div className="wow-content">
               <span className="wow-value">{analytics.weekOverWeek.thisWeekCompleted}</span>
               <span className="wow-label">workouts</span>
@@ -197,7 +197,7 @@ export function HistoryPage() {
         {/* Weekly Trend Chart */}
         {analytics && analytics.weeklySeries.length > 0 && (
           <section className="trend-chart">
-            <h3>Weekly Activity</h3>
+            <h2>Weekly Activity</h2>
             <div className="chart-container">
               {analytics.weeklySeries.map((week, index) => (
                 <div key={week.weekStart} className="chart-bar-wrapper">
@@ -329,7 +329,7 @@ export function HistoryPage() {
 
         {/* Session List */}
         <section className="session-list">
-          <h3>Recent Workouts</h3>
+          <h2>Recent Workouts</h2>
           {sessions.length === 0 ? (
             <div className="empty-state">
               <p>No completed workouts yet.</p>

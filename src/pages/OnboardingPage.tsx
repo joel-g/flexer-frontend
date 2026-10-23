@@ -69,12 +69,19 @@ export function OnboardingPage() {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [importing, setImporting] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileAttempt, setProfileAttempt] = useState(0);
 
   // Load existing profile data on mount
   useEffect(() => {
     async function loadProfile() {
+      setProfileLoading(true);
+      setProfileError(null);
       try {
         const res = await api.get<UserProfile>('/profile');
+        // A verified missing user is the API's first-time onboarding response; PUT creates it.
+        if (!res.success && res.error === 'User not found') return;
+        if (!res.success || !res.data) throw new Error(res.error || 'Failed to load profile');
         if (res.success && res.data) {
           const profile = res.data;
           setData(prev => ({
@@ -95,13 +102,14 @@ export function OnboardingPage() {
           }));
         }
       } catch (err) {
+        setProfileError(err instanceof Error ? err.message : 'Failed to load profile');
         console.error('Failed to load profile:', err);
       } finally {
         setProfileLoading(false);
       }
     }
     loadProfile();
-  }, []);
+  }, [profileAttempt]);
 
   function updateData(updates: Partial<OnboardingData>) {
     setData(prev => ({ ...prev, ...updates }));
@@ -232,6 +240,10 @@ export function OnboardingPage() {
     );
   }
 
+  if (profileError) {
+    return <ResponsiveLayout><div className="onboarding-page"><h1>Build your plan</h1><p role="alert">{profileError}. Your saved profile has not been changed.</p><button className="btn btn-primary" onClick={() => setProfileAttempt(value => value + 1)}>Retry loading profile</button></div></ResponsiveLayout>;
+  }
+
   if (importing) {
     return (
       <ResponsiveLayout>
@@ -259,7 +271,7 @@ export function OnboardingPage() {
           <p className="step-title">{STEPS[step].title}</p>
         </header>
 
-      <main className="onboarding-content">
+      <section className="onboarding-content" aria-label="Plan setup">
         {error && <div className="error-banner">{error}</div>}
 
         {step === 0 && <DemographicsStep data={data} updateData={updateData} />}
@@ -279,7 +291,7 @@ export function OnboardingPage() {
             onCopyPrompt={copyPromptToClipboard}
           />
         )}
-      </main>
+      </section>
 
       <footer className="onboarding-footer">
         {step > 0 && (
@@ -425,7 +437,7 @@ function DemographicsStep({ data, updateData }: StepProps) {
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
-          value={data.age || ''}
+          aria-label="Age" value={data.age || ''}
           onChange={e => {
             const val = e.target.value.replace(/\D/g, '');
             updateData({ age: val ? parseInt(val) : undefined });
@@ -474,7 +486,7 @@ function DemographicsStep({ data, updateData }: StepProps) {
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  value={localFeet}
+                  aria-label="Height in feet" value={localFeet}
                   onChange={e => setLocalFeet(e.target.value.replace(/\D/g, ''))}
                   onBlur={saveHeightImperial}
                   placeholder="5"
@@ -486,7 +498,7 @@ function DemographicsStep({ data, updateData }: StepProps) {
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  value={localInches}
+                  aria-label="Additional height in inches" value={localInches}
                   onChange={e => setLocalInches(e.target.value.replace(/\D/g, ''))}
                   onBlur={saveHeightImperial}
                   placeholder="10"
@@ -501,7 +513,7 @@ function DemographicsStep({ data, updateData }: StepProps) {
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              value={localLbs}
+              aria-label="Weight in pounds" value={localLbs}
               onChange={e => setLocalLbs(e.target.value.replace(/\D/g, ''))}
               onBlur={saveWeightImperial}
               placeholder="160"
@@ -516,7 +528,7 @@ function DemographicsStep({ data, updateData }: StepProps) {
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              value={data.heightCm || ''}
+              aria-label="Height in centimetres" value={data.heightCm || ''}
               onChange={e => {
                 const val = e.target.value.replace(/\D/g, '');
                 updateData({ heightCm: val ? parseInt(val) : undefined });
@@ -530,7 +542,7 @@ function DemographicsStep({ data, updateData }: StepProps) {
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              value={data.weightKg || ''}
+              aria-label="Weight in kilograms" value={data.weightKg || ''}
               onChange={e => {
                 const val = e.target.value.replace(/\D/g, '');
                 updateData({ weightKg: val ? parseInt(val) : undefined });
@@ -613,7 +625,7 @@ function ExperienceStep({ data, updateData }: StepProps) {
             type="range"
             min="2"
             max="6"
-            value={data.workoutFrequency || 4}
+            aria-label="Training days per week" value={data.workoutFrequency || 4}
             onChange={e => updateData({ workoutFrequency: parseInt(e.target.value) })}
           />
           <span className="slider-value">{data.workoutFrequency || 4} days</span>
@@ -628,7 +640,7 @@ function ExperienceStep({ data, updateData }: StepProps) {
             min="20"
             max="90"
             step="5"
-            value={data.workoutDuration || 45}
+            aria-label="Minutes per workout" value={data.workoutDuration || 45}
             onChange={e => updateData({ workoutDuration: parseInt(e.target.value) })}
           />
           <span className="slider-value">{data.workoutDuration || 45} min</span>
@@ -678,7 +690,7 @@ function InjuriesStep({ data, updateData }: StepProps) {
         <div className="form-group">
           <label>Tell us more about your injury (optional)</label>
           <textarea
-            value={data.injuryDetails || ''}
+            aria-label="Injury details" value={data.injuryDetails || ''}
             onChange={e => updateData({ injuryDetails: e.target.value })}
             placeholder="e.g., Recovering from rotator cuff surgery 3 months ago, cleared for light exercise..."
             rows={3}
@@ -730,7 +742,7 @@ function EquipmentStep({ data, updateData }: StepProps) {
       <div className="form-group">
         <label>Additional equipment details (optional)</label>
         <textarea
-          value={data.equipmentDetails || ''}
+          aria-label="Additional equipment" value={data.equipmentDetails || ''}
           onChange={e => updateData({ equipmentDetails: e.target.value })}
           placeholder="e.g., Home gym with adjustable dumbbells 5-50lbs, Olympic barbell..."
           rows={2}
@@ -748,7 +760,7 @@ function CustomGoalStep({ data, updateData }: StepProps) {
       </p>
       <div className="form-group">
         <textarea
-          value={data.customGoal || ''}
+          aria-label="Your training goal" value={data.customGoal || ''}
           onChange={e => updateData({ customGoal: e.target.value })}
           placeholder="e.g., I'm recovering from a shoulder injury and want to rebuild strength safely. I also want to improve my overall fitness and lose some weight around my midsection."
           rows={5}
@@ -850,11 +862,17 @@ function GeneratePlanStep({
   onCopyPrompt,
 }: GeneratePlanStepProps) {
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
 
   async function handleCopy() {
-    await onCopyPrompt();
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopyError(false);
+    try {
+      await onCopyPrompt();
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopyError(true);
+    }
   }
 
   if (promptLoading) {
@@ -919,6 +937,7 @@ function GeneratePlanStep({
       </div>
 
       <div className="prompt-section">
+        {copyError && <p role="alert">Clipboard unavailable. Select and copy the prompt below.</p>}
         <div className="prompt-header">
           <label>Your Personalized Prompt</label>
           <button onClick={handleCopy} className="btn btn-small" disabled={!prompt}>
@@ -940,7 +959,7 @@ function GeneratePlanStep({
           It can take 2-3 minutes to generate your plan. Make sure your AI has finished typing before copying!
         </p>
         <textarea
-          value={jsonInput}
+          aria-label="Workout plan JSON" value={jsonInput}
           onChange={e => setJsonInput(e.target.value)}
           placeholder='Paste the JSON response here...
 
@@ -954,7 +973,7 @@ It should start with something like:
         />
 
         {validationErrors.length > 0 && (
-          <div className="validation-errors">
+          <div className="validation-errors" role="alert">
             <strong>Validation Errors:</strong>
             <ul>
               {validationErrors.map((err, i) => (

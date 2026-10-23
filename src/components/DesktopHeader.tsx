@@ -1,90 +1,73 @@
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useClerk, useUser } from '@clerk/clerk-react';
+import { useState } from "react";
+import { NavLink, Link, useNavigate } from "react-router-dom";
+import { useClerk, useUser } from "@clerk/clerk-react";
+import { AppIcon } from "./AppIcon";
 
 export function DesktopHeader() {
   const navigate = useNavigate();
   const { signOut } = useClerk();
   const { user } = useUser();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
+  const [signingOut, setSigningOut] = useState(false);
+  const [error, setError] = useState("");
   async function handleSignOut() {
-    await signOut();
-    navigate('/');
+    setSigningOut(true);
+    setError("");
+    try {
+      await signOut();
+      navigate("/");
+    } catch {
+      setError("Sign out failed. Please try again.");
+      setSigningOut(false);
+    }
   }
-
-  const initials = user?.firstName?.[0] || user?.emailAddresses?.[0]?.emailAddress?.[0] || '?';
-
+  const initials =
+    user?.firstName?.[0] || user?.emailAddresses?.[0]?.emailAddress?.[0] || "F";
+  const links = [
+    { to: "/dashboard", name: "Today", icon: "today" },
+    { to: "/plan", name: "My plan", icon: "plan" },
+    { to: "/history", name: "History", icon: "history" },
+    { to: "/onboarding", name: "Build a plan", icon: "build" },
+    { to: "/profile", name: "Profile", icon: "profile" },
+  ];
   return (
-    <header className="desktop-header">
-      <div className="desktop-header-content">
-        <button className="desktop-logo" onClick={() => navigate('/dashboard')}>
-          Flexer
-        </button>
-
-        <nav className="desktop-nav">
-          <button onClick={() => navigate('/dashboard')} className="desktop-nav-link">
-            Dashboard
-          </button>
-          <button onClick={() => navigate('/plan')} className="desktop-nav-link">
-            My Plan
-          </button>
-        </nav>
-
-        <div className="desktop-profile" ref={dropdownRef}>
-          <button 
-            className="profile-trigger"
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            aria-expanded={dropdownOpen}
-            aria-haspopup="true"
+    <aside className="training-rail" aria-label="Training navigation">
+      <Link className="training-brand" to="/dashboard" aria-label="Flexer home">
+        <span className="training-brand-mark">f</span>flexer
+        <span className="training-brand-dot">.</span>
+      </Link>
+      <p className="rail-caption">YOUR TRAINING SPACE</p>
+      <nav className="training-navigation" aria-label="Main navigation">
+        {links.map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            className={({ isActive }) =>
+              isActive ? "training-nav-link active" : "training-nav-link"
+            }
           >
-            <span className="profile-avatar">{initials.toUpperCase()}</span>
-            <span className="profile-label">Profile</span>
-            <span className="profile-chevron">{dropdownOpen ? '▲' : '▼'}</span>
-          </button>
-
-          {dropdownOpen && (
-            <div className="profile-dropdown">
-              <div className="profile-dropdown-header">
-                <span className="profile-email">
-                  {user?.emailAddresses?.[0]?.emailAddress || 'User'}
-                </span>
-              </div>
-              <button 
-                onClick={() => {
-                  setDropdownOpen(false);
-                  navigate('/profile');
-                }}
-                className="profile-dropdown-item"
-              >
-                <span className="dropdown-icon">⚙️</span>
-                Settings
-              </button>
-              <div className="profile-dropdown-divider" />
-              <button 
-                onClick={handleSignOut}
-                className="profile-dropdown-item profile-dropdown-signout"
-              >
-                <span className="dropdown-icon">🚪</span>
-                Sign Out
-              </button>
-            </div>
-          )}
+            <AppIcon name={link.icon} />
+            <span>{link.name}</span>
+          </NavLink>
+        ))}
+      </nav>
+      <div className="training-account">
+        <div className="account-summary">
+          <span className="account-monogram">{initials.toUpperCase()}</span>
+          <div>
+            <strong>{user?.firstName || "Your account"}</strong>
+            <Link to="/profile">Profile & preferences</Link>
+          </div>
         </div>
+        <button
+          className="training-signout"
+          onClick={handleSignOut}
+          disabled={signingOut}
+        >
+          <AppIcon name="exit" size={18} />
+          {signingOut ? "Signing out…" : "Sign out"}
+        </button>
+        {error && <p role="alert">{error}</p>}
       </div>
-    </header>
+    </aside>
   );
 }

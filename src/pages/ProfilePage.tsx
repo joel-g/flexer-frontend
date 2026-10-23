@@ -28,6 +28,7 @@ export function ProfilePage() {
   const { userId } = useAuth();
   const { themeId, setTheme } = useTheme();
   const [loading, setLoading] = useState(true);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -81,13 +82,18 @@ export function ProfilePage() {
   async function loadProfile() {
     try {
       setLoading(true);
+      setError(null);
       const res = await api.get<UserProfile>('/profile');
+      // The API creates a first-time user's profile on PUT.
+      if (!res.success && res.error === 'User not found') { setProfileLoaded(true); return; }
+      if (!res.success || !res.data) throw new Error(res.error || 'Failed to load profile');
 
       if (res.success && res.data) {
         setAge(res.data.age);
         setHeightCm(res.data.heightCm);
         setWeightKg(res.data.weightKg);
         setEquipment(res.data.equipmentAvailable || []);
+        setProfileLoaded(true);
 
         // Initialize imperial display values
         if (res.data.heightCm) {
@@ -108,6 +114,7 @@ export function ProfilePage() {
   }
 
   async function saveProfile() {
+    if (!profileLoaded) return;
     setSaving(true);
     setError(null);
     setSuccess(false);
@@ -189,6 +196,10 @@ export function ProfilePage() {
     );
   }
 
+  if (!profileLoaded) {
+    return <ResponsiveLayout><div className="profile-page"><h1>Profile settings</h1><p role="alert">{error || 'Your profile could not be loaded.'} Your saved profile has not been changed.</p><button className="btn btn-primary" onClick={() => { void loadProfile(); }}>Retry loading profile</button></div></ResponsiveLayout>;
+  }
+
   return (
     <ResponsiveLayout>
       <div className="profile-page">
@@ -199,9 +210,9 @@ export function ProfilePage() {
           <h1>Profile Settings</h1>
         </header>
 
-      <main className="profile-content">
-        {error && <div className="error-banner">{error}</div>}
-        {success && <div className="success-banner">Profile saved successfully!</div>}
+      <section className="profile-content" aria-label="Profile preferences">
+        {error && <div className="error-banner" role="alert">{error}</div>}
+        {success && <div className="success-banner" role="status">Profile saved successfully!</div>}
 
         <section className="profile-section">
           <h2>Personal Info</h2>
@@ -210,7 +221,7 @@ export function ProfilePage() {
             <label>Age</label>
             <input
               type="number"
-              value={age || ''}
+              aria-label="Age" value={age || ''}
               onChange={e => setAge(parseInt(e.target.value) || undefined)}
               placeholder="30"
               min="13"
@@ -241,7 +252,7 @@ export function ProfilePage() {
                   <div className="height-field">
                     <input
                       type="number"
-                      value={localFeet}
+                      aria-label="Height in feet" value={localFeet}
                       onChange={e => setLocalFeet(e.target.value)}
                       placeholder="5"
                       min="3"
@@ -252,7 +263,7 @@ export function ProfilePage() {
                   <div className="height-field">
                     <input
                       type="number"
-                      value={localInches}
+                      aria-label="Additional height in inches" value={localInches}
                       onChange={e => setLocalInches(e.target.value)}
                       placeholder="10"
                       min="0"
@@ -266,7 +277,7 @@ export function ProfilePage() {
                 <label>Weight (lbs)</label>
                 <input
                   type="number"
-                  value={localLbs}
+                  aria-label="Weight in pounds" value={localLbs}
                   onChange={e => setLocalLbs(e.target.value)}
                   placeholder="160"
                   min="50"
@@ -280,7 +291,7 @@ export function ProfilePage() {
                 <label>Height (cm)</label>
                 <input
                   type="number"
-                  value={heightCm || ''}
+                  aria-label="Height in centimetres" value={heightCm || ''}
                   onChange={e => setHeightCm(parseInt(e.target.value) || undefined)}
                   placeholder="175"
                 />
@@ -289,7 +300,7 @@ export function ProfilePage() {
                 <label>Weight (kg)</label>
                 <input
                   type="number"
-                  value={weightKg || ''}
+                  aria-label="Weight in kilograms" value={weightKg || ''}
                   onChange={e => setWeightKg(parseInt(e.target.value) || undefined)}
                   placeholder="70"
                 />
@@ -404,7 +415,7 @@ export function ProfilePage() {
                 </p>
                 <input
                   type="text"
-                  value={deleteConfirmText}
+                  aria-label="Type DELETE to confirm deleting Flexer data" value={deleteConfirmText}
                   onChange={e => setDeleteConfirmText(e.target.value.toUpperCase())}
                   placeholder="DELETE"
                   className="delete-confirm-input"
@@ -433,7 +444,7 @@ export function ProfilePage() {
             )}
           </div>
         </section>
-      </main>
+      </section>
       </div>
     </ResponsiveLayout>
   );
