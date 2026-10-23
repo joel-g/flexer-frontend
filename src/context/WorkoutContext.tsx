@@ -1,523 +1,237 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { WorkoutProgress, WorkoutDay, WorkoutPlan, PlanResponse, LoadType, WeightUnit, UpsertSetLogRequest, WorkoutSetLog } from '../types/workout';
 import { useAuth } from '@clerk/clerk-react';
 import { api, sessionApi } from '../services/api';
-
-// Queue item for failed set logs
-interface QueuedSetLog {
-  sessionId: string;
-  request: UpsertSetLogRequest;
-  attempts: number;
-  lastAttempt: number;
-}
-
-const SET_LOG_QUEUE_KEY = 'flexer-set-log-queue';
-const MAX_RETRY_ATTEMPTS = 5;
-const RETRY_DELAY_MS = 5000;
+import { DurableSetQueue, migrateLegacyQueue, queueKey, userPrefix, validateSetRequest, recoverCompletionMarker } from '../services/workoutStorage';
 
 interface SetLogData {
-  exerciseId: string;
-  exerciseName: string;
-  setNumber: number;
-  targetReps?: string;
-  targetWeight?: string;
-  actualReps?: number;
-  actualWeightValue?: number;
-  actualWeightUnit?: WeightUnit;
-  actualDurationSeconds?: number;
-  actualDistanceValue?: number;
-  actualDistanceUnit?: 'mi' | 'km' | 'm';
-  qualitativeLoadLabel?: string;
-  loadType?: LoadType;
+  exerciseId: string; exerciseName: string; setNumber: number;
+  targetReps?: string; targetWeight?: string; actualReps?: number;
+  actualWeightValue?: number; actualWeightUnit?: WeightUnit;
+  actualDurationSeconds?: number; actualDistanceValue?: number;
+  actualDistanceUnit?: 'mi' | 'km' | 'm'; qualitativeLoadLabel?: string; loadType?: LoadType;
 }
-
 interface WorkoutContextType {
-  currentPlan: WorkoutPlan | null;
-  currentPlanId: string | null;
-  progress: WorkoutProgress;
-  currentWorkout: WorkoutDay | null;
-  loading: boolean;
-  error: string | null;
-  // Session state
-  currentSessionId: string | null;
-  sessionStartTime: Date | null;
-  resumedSetLogs: WorkoutSetLog[];
-  // Navigation
-  nextWorkout: () => void;
-  previousWorkout: () => void;
-  completeCurrentWorkout: () => Promise<void>;
-  uncompleteWorkout: (workoutDayId: string) => void;
-  resetProgress: () => void;
-  refreshData: () => Promise<void>;
-  deletePlan: () => Promise<boolean>;
-  // Session methods
+  currentPlan: WorkoutPlan | null; currentPlanId: string | null;
+  progress: WorkoutProgress; currentWorkout: WorkoutDay | null; loading: boolean; error: string | null;
+  syncMessage: string | null;
+  currentSessionId: string | null; sessionStartTime: Date | null; resumedSetLogs: WorkoutSetLog[];
+  nextWorkout: () => void; previousWorkout: () => void;
+  completeCurrentWorkout: () => Promise<void>; uncompleteWorkout: (id: string) => void;
+  resetProgress: () => void; refreshData: () => Promise<void>; deletePlan: () => Promise<boolean>;
   startWorkoutSession: () => Promise<string | null>;
   logSetCompletion: (data: SetLogData) => Promise<void>;
-  endWorkoutSession: (totalSetsPlanned: number, totalSetsCompleted: number) => Promise<void>;
+  endWorkoutSession: (planned: number, completed: number) => Promise<void>;
 }
-
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
-
 export const useWorkout = () => {
   const context = useContext(WorkoutContext);
-  if (!context) {
-    throw new Error('useWorkout must be used within a WorkoutProvider');
-  }
+  if (!context) throw new Error('useWorkout must be used within a WorkoutProvider');
   return context;
 };
+const DEFAULT_PROGRESS: WorkoutProgress = { currentWeek: 0, currentDay: 0, completedWorkouts: [] };
+const message = (err: unknown) => err instanceof Error ? err.message : 'Could not save your workout. Please retry.';
 
-interface WorkoutProviderProps {
-  children: ReactNode;
-}
-
-const DEFAULT_PROGRESS: WorkoutProgress = {
-  currentWeek: 0,
-  currentDay: 0,
-  completedWorkouts: [],
-};
-
-export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) => {
-  const { isSignedIn, getToken } = useAuth();
+export const WorkoutProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { userId } = useAuth();
   const [currentPlan, setCurrentPlan] = useState<WorkoutPlan | null>(null);
   const [currentPlanId, setCurrentPlanId] = useState<string | null>(null);
-  const [progress, setProgress] = useState<WorkoutProgress>(() => {
-    // Initialize from localStorage for immediate display
-    const saved = localStorage.getItem('workout-progress');
-    return saved ? JSON.parse(saved) : DEFAULT_PROGRESS;
-  });
+  const [progress, setProgress] = useState<WorkoutProgress>(DEFAULT_PROGRESS);
+  const progressRef = useRef(progress);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Session state
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
   const [resumedSetLogs, setResumedSetLogs] = useState<WorkoutSetLog[]>([]);
+  const queueRef = useRef<DurableSetQueue | null>(null);
+  const alive = useRef(true);
+  const startRef = useRef<Promise<string | null> | null>(null);
+  const progressWrites = useRef<Promise<void>>(Promise.resolve());
+  const sessionRef = useRef<string | null>(null);
+  const storageKey = userId && currentPlanId ? `${userPrefix(userId)}plan:${encodeURIComponent(currentPlanId)}:progress` : null;
+  const completionKey = storageKey ? `${storageKey}:completion` : null;
 
-  // Debounce timer for syncing to API
-  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Retry queue for failed set logs
-  const retryQueueRef = useRef<QueuedSetLog[]>([]);
-  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Load queued set logs from localStorage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(SET_LOG_QUEUE_KEY);
-      if (saved) {
-        retryQueueRef.current = JSON.parse(saved);
-        if (retryQueueRef.current.length > 0) {
-          processRetryQueue();
-        }
-      }
-    } catch {
-      // Ignore parse errors
-    }
-  }, []);
-
-  // Save queue to localStorage
-  const saveQueueToStorage = useCallback(() => {
-    try {
-      localStorage.setItem(SET_LOG_QUEUE_KEY, JSON.stringify(retryQueueRef.current));
-    } catch {
-      // Ignore storage errors
-    }
-  }, []);
-
-  // Process retry queue
-  const processRetryQueue = useCallback(async () => {
-    if (retryQueueRef.current.length === 0) return;
-
-    const now = Date.now();
-    const itemsToRetry = retryQueueRef.current.filter(
-      item => now - item.lastAttempt >= RETRY_DELAY_MS && item.attempts < MAX_RETRY_ATTEMPTS
-    );
-
-    for (const item of itemsToRetry) {
-      try {
-        const response = await sessionApi.upsertSetLog(item.sessionId, item.request);
-        if (response.success) {
-          // Remove from queue on success
-          retryQueueRef.current = retryQueueRef.current.filter(q => q !== item);
-          console.log('Retry succeeded for set log:', item.request.exerciseName, item.request.setNumber);
-        } else {
-          // Update attempt count
-          item.attempts++;
-          item.lastAttempt = now;
-          console.warn('Retry failed for set log:', item.request.exerciseName, `(attempt ${item.attempts})`);
-        }
-      } catch {
-        item.attempts++;
-        item.lastAttempt = now;
-      }
-    }
-
-    // Remove items that exceeded max attempts
-    const expiredItems = retryQueueRef.current.filter(item => item.attempts >= MAX_RETRY_ATTEMPTS);
-    if (expiredItems.length > 0) {
-      console.error('Set logs exceeded max retries and were dropped:', expiredItems.length);
-      retryQueueRef.current = retryQueueRef.current.filter(item => item.attempts < MAX_RETRY_ATTEMPTS);
-    }
-
-    saveQueueToStorage();
-
-    // Schedule next retry if queue still has items
-    if (retryQueueRef.current.length > 0) {
-      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
-      retryTimerRef.current = setTimeout(processRetryQueue, RETRY_DELAY_MS);
-    }
-  }, [saveQueueToStorage]);
-
-  // Add to retry queue
-  const addToRetryQueue = useCallback((sessionId: string, request: UpsertSetLogRequest) => {
-    retryQueueRef.current.push({
-      sessionId,
-      request,
-      attempts: 1,
-      lastAttempt: Date.now(),
+  const flushLogs = useCallback(async () => {
+    const queue = queueRef.current;
+    if (!queue) return;
+    await queue.flush(async item => {
+      if (!alive.current) throw new Error('Workout closed. Saved logs will retry next time.');
+      const response = await sessionApi.upsertSetLog(item.sessionId, item.request);
+      if (!response.success) throw new Error(response.error || 'Set not saved. Please retry.');
     });
-    saveQueueToStorage();
+    if (alive.current) setSyncMessage(queue.items().length ? 'Some sets are waiting to sync.' : null);
+  }, []);
 
-    // Start retry timer if not already running
-    if (!retryTimerRef.current) {
-      retryTimerRef.current = setTimeout(processRetryQueue, RETRY_DELAY_MS);
-    }
-  }, [saveQueueToStorage, processRetryQueue]);
-
-  // Set up API token getter
   useEffect(() => {
-    api.setTokenGetter(getToken);
-  }, [getToken]);
+    alive.current = true;
+    const retry = () => { void flushLogs().catch(err => { if (alive.current) setSyncMessage(message(err)); }); };
+    const timer = setInterval(retry, 15000);
+    window.addEventListener('online', retry);
+    return () => { alive.current = false; clearInterval(timer); window.removeEventListener('online', retry); };
+  }, [flushLogs]);
 
-  // Load data from API when signed in
-  useEffect(() => {
-    if (isSignedIn) {
-      loadFromApi();
-    } else {
-      setLoading(false);
-    }
-  }, [isSignedIn]);
-
-  // Save progress to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('workout-progress', JSON.stringify(progress));
-  }, [progress]);
-
-  // Sync progress to API (debounced)
-  const syncProgressToApi = useCallback(async (newProgress: WorkoutProgress) => {
-    if (!isSignedIn) return;
-
-    // Clear any pending sync
-    if (syncTimerRef.current) {
-      clearTimeout(syncTimerRef.current);
-    }
-
-    // Debounce API sync by 1 second
-    syncTimerRef.current = setTimeout(async () => {
-      try {
-        await api.put('/progress', {
-          currentWeek: newProgress.currentWeek,
-          currentDay: newProgress.currentDay,
-          completedWorkouts: newProgress.completedWorkouts,
-          currentWorkoutState: newProgress.currentWorkoutProgress,
-        });
-      } catch (err) {
-        console.error('Failed to sync progress:', err);
-      }
-    }, 1000);
-  }, [isSignedIn]);
-
-  async function loadFromApi() {
+  const loadFromApi = useCallback(async () => {
+    if (!userId) return;
     try {
-      setLoading(true);
-      setError(null);
-
-      // Fetch plan and progress in parallel
+      setLoading(true); setError(null);
       const [plansRes, progressRes] = await Promise.all([
-        api.get<{ plans: PlanResponse[] }>('/plans?active=true'),
-        api.get<WorkoutProgress>('/progress'),
+        api.get<{ plans: PlanResponse[] }>('/plans?active=true'), api.get<WorkoutProgress>('/progress'),
       ]);
-
-      if (plansRes.success && plansRes.data?.plans.length) {
-        setCurrentPlan(plansRes.data.plans[0].planData);
-        setCurrentPlanId(plansRes.data.plans[0].id);
-      }
-
-      if (progressRes.success && progressRes.data) {
-        setProgress(progressRes.data);
-      }
-    } catch (err) {
-      console.error('Failed to load from API:', err);
-      setError('Failed to load workout data');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const refreshData = async () => {
-    await loadFromApi();
-  };
-
-  const getCurrentWorkout = (): WorkoutDay | null => {
-    if (!currentPlan) return null;
-    if (progress.currentWeek >= currentPlan.weeks.length) {
-      return null; // Plan completed
-    }
-
-    const currentWeek = currentPlan.weeks[progress.currentWeek];
-    if (progress.currentDay >= currentWeek.days.length) {
-      return null; // Week completed
-    }
-
-    return currentWeek.days[progress.currentDay];
-  };
-
-  const nextWorkout = () => {
-    if (!currentPlan) return;
-
-    setProgress(prev => {
-      const newProgress = { ...prev };
-      const currentWeek = currentPlan.weeks[newProgress.currentWeek];
-
-      if (newProgress.currentDay < currentWeek.days.length - 1) {
-        // Next day in current week
-        newProgress.currentDay++;
-      } else if (newProgress.currentWeek < currentPlan.weeks.length - 1) {
-        // Next week, first day
-        newProgress.currentWeek++;
-        newProgress.currentDay = 0;
-      }
-
-      syncProgressToApi(newProgress);
-      return newProgress;
-    });
-  };
-
-  const previousWorkout = () => {
-    if (!currentPlan) return;
-
-    setProgress(prev => {
-      const newProgress = { ...prev };
-
-      if (newProgress.currentDay > 0) {
-        // Previous day in current week
-        newProgress.currentDay--;
-      } else if (newProgress.currentWeek > 0) {
-        // Previous week, last day
-        newProgress.currentWeek--;
-        const prevWeek = currentPlan.weeks[newProgress.currentWeek];
-        newProgress.currentDay = prevWeek.days.length - 1;
-      }
-
-      syncProgressToApi(newProgress);
-      return newProgress;
-    });
-  };
-
-  const completeCurrentWorkout = async () => {
-    const currentWorkout = getCurrentWorkout();
-    if (currentWorkout) {
-      setProgress(prev => {
-        const newProgress = {
-          ...prev,
-          completedWorkouts: [...prev.completedWorkouts, currentWorkout.id],
-        };
-        syncProgressToApi(newProgress);
-        return newProgress;
-      });
-    }
-  };
-
-  // Session management methods
-  const startWorkoutSession = async (): Promise<string | null> => {
-    const workout = getCurrentWorkout();
-    if (!workout || !currentPlanId) {
-      console.error('Cannot start session: no workout or plan');
-      return null;
-    }
-
-    try {
-      const startTime = new Date();
-      const response = await sessionApi.startSession({
-        planId: currentPlanId,
-        workoutDayId: workout.id,
-        weekNumber: progress.currentWeek + 1,
-        dayNumber: progress.currentDay + 1,
-        workoutName: workout.name,
-        startedAt: startTime.toISOString(),
-      });
-
-      if (response.success && response.data) {
-        const { sessionId, isResume } = response.data;
-        setCurrentSessionId(sessionId);
-        setSessionStartTime(startTime);
-
-        // If resuming, fetch existing set logs to restore position
-        if (isResume) {
-          try {
-            const detailRes = await sessionApi.getSessionDetail(sessionId);
-            if (detailRes.success && detailRes.data?.setLogs) {
-              setResumedSetLogs(detailRes.data.setLogs);
-              console.log('Session resumed with', detailRes.data.setLogs.length, 'existing set logs');
-            }
-          } catch (err) {
-            console.warn('Failed to fetch set logs for resume:', err);
-            setResumedSetLogs([]);
+      if (!plansRes.success || !progressRes.success) throw new Error(plansRes.error || progressRes.error || 'Could not load workouts');
+      if (!alive.current) return;
+      const plan = plansRes.data?.plans[0];
+      setCurrentPlan(plan?.planData ?? null); setCurrentPlanId(plan?.id ?? null);
+      const saved = progressRes.data ?? DEFAULT_PROGRESS;
+      const week = Number.isInteger(saved.currentWeek) && saved.currentWeek >= 0 && saved.currentWeek < (plan?.planData.weeks.length ?? 0) ? saved.currentWeek : 0;
+      const day = Number.isInteger(saved.currentDay) && saved.currentDay >= 0 && saved.currentDay < (plan?.planData.weeks[week]?.days.length ?? 0) ? saved.currentDay : 0;
+      const normalized = { ...saved, currentWeek: week, currentDay: day, completedWorkouts: Array.isArray(saved.completedWorkouts) ? saved.completedWorkouts : [] };
+      if (plan) {
+        const pendingKey = `${userPrefix(userId)}plan:${encodeURIComponent(plan.id)}:progress:completion`;
+        const pending = localStorage.getItem(pendingKey);
+        if (pending) {
+          const pendingId: unknown = JSON.parse(pending);
+          if (typeof pendingId !== 'string') throw new Error('Saved completion could not be read. Keep this browser data and contact support.');
+          const detail = await sessionApi.getSessionDetail(pendingId);
+          if (!detail.success || !detail.data || detail.data.session.planId !== plan.id) throw new Error('Could not restore your pending workout completion. Please reconnect and retry.');
+          const session = detail.data.session;
+          const recovery = recoverCompletionMarker(localStorage, pendingKey, normalized, session, plan.planData);
+          Object.assign(normalized, recovery.progress);
+          if (recovery.resume) {
+            sessionRef.current = pendingId; setCurrentSessionId(pendingId);
+            setSessionStartTime(new Date(session.startedAt)); setResumedSetLogs(detail.data.setLogs);
+          } else {
+            sessionRef.current = null; setCurrentSessionId(null);
+            setSessionStartTime(null); setResumedSetLogs([]);
           }
-        } else {
-          setResumedSetLogs([]);
         }
-
-        console.log('Session started:', sessionId, isResume ? '(resumed)' : '(new)');
-        return sessionId;
-      } else {
-        console.error('Failed to start session:', response.error);
-        return null;
       }
-    } catch (err) {
-      console.error('Error starting session:', err);
-      return null;
-    }
-  };
-
-  const logSetCompletion = async (data: SetLogData): Promise<void> => {
-    if (!currentSessionId) {
-      console.warn('No active session, skipping set log');
-      return;
-    }
-
-    const request: UpsertSetLogRequest = {
-      exerciseId: data.exerciseId,
-      exerciseName: data.exerciseName,
-      loadType: data.loadType || 'external_weight',
-      setNumber: data.setNumber,
-      targetReps: data.targetReps,
-      targetWeight: data.targetWeight,
-      actualReps: data.actualReps,
-      actualWeightValue: data.actualWeightValue,
-      actualWeightUnit: data.actualWeightUnit,
-      actualDurationSeconds: data.actualDurationSeconds,
-      actualDistanceValue: data.actualDistanceValue,
-      actualDistanceUnit: data.actualDistanceUnit,
-      qualitativeLoadLabel: data.qualitativeLoadLabel,
-      completed: true,
-      loggedAt: new Date().toISOString(),
-    };
-
-    try {
-      const response = await sessionApi.upsertSetLog(currentSessionId, request);
-
-      if (!response.success) {
-        console.error('Failed to log set, adding to retry queue:', response.error);
-        addToRetryQueue(currentSessionId, request);
+      progressRef.current = normalized; setProgress(normalized);
+      if (plan) {
+        const queue = new DurableSetQueue(localStorage, queueKey(userId, plan.id));
+        queue.items(); // Validate before allowing another write to this cache.
+        queueRef.current = queue;
+        try {
+          await migrateLegacyQueue(localStorage, queue, plan.id, async id => {
+            if (!alive.current) throw new Error('Account changed. Resume this workout after signing in.');
+            const detail = await sessionApi.getSessionDetail(id);
+            if (!alive.current) throw new Error('Account changed. Resume this workout after signing in.');
+            return detail.success ? detail.data?.session ?? null : null;
+          });
+          await flushLogs();
+        } catch (err) { if (alive.current) setSyncMessage(message(err)); }
       }
-    } catch (err) {
-      console.error('Error logging set, adding to retry queue:', err);
-      addToRetryQueue(currentSessionId, request);
-    }
-  };
+    } catch (err) { if (alive.current) setError(message(err)); }
+    finally { if (alive.current) setLoading(false); }
+  }, [userId, flushLogs]);
+  useEffect(() => { void loadFromApi(); }, [loadFromApi]);
 
-  const endWorkoutSession = async (totalSetsPlanned: number, totalSetsCompleted: number): Promise<void> => {
-    if (!currentSessionId || !sessionStartTime) {
-      console.warn('No active session to end');
-      return;
-    }
-
-    try {
-      const completedAt = new Date();
-      const durationSeconds = Math.floor((completedAt.getTime() - sessionStartTime.getTime()) / 1000);
-
-      const response = await sessionApi.completeSession(currentSessionId, {
-        completedAt: completedAt.toISOString(),
-        durationSeconds,
-        totalSetsPlanned,
-        totalSetsCompleted,
+  const saveProgress = async (next: WorkoutProgress) => {
+    const write = progressWrites.current.catch(() => {}).then(async () => {
+      if (!alive.current) throw new Error('Workout closed before progress could be saved.');
+      const response = await api.put('/progress', {
+        currentWeek: next.currentWeek, currentDay: next.currentDay,
+        completedWorkouts: next.completedWorkouts, currentWorkoutState: next.currentWorkoutProgress,
       });
-
-      if (response.success) {
-        console.log('Session completed:', currentSessionId);
-      } else {
-        console.error('Failed to complete session:', response.error);
-      }
-    } catch (err) {
-      console.error('Error completing session:', err);
-    } finally {
-      // Clear session state regardless of API result
-      setCurrentSessionId(null);
-      setSessionStartTime(null);
-      setResumedSetLogs([]);
-    }
-  };
-
-  const resetProgress = () => {
-    const newProgress = DEFAULT_PROGRESS;
-    setProgress(newProgress);
-    syncProgressToApi(newProgress);
-  };
-
-  const uncompleteWorkout = (workoutDayId: string) => {
-    setProgress(prev => {
-      const newProgress = {
-        ...prev,
-        completedWorkouts: prev.completedWorkouts.filter(id => id !== workoutDayId),
-      };
-      syncProgressToApi(newProgress);
-      return newProgress;
+      if (!response.success) throw new Error(response.error || 'Progress could not be saved');
     });
+    progressWrites.current = write;
+    await write;
+    if (alive.current) { progressRef.current = next; setProgress(next); }
+    if (storageKey) localStorage.setItem(storageKey, JSON.stringify(next));
   };
-
-  const deletePlan = async (): Promise<boolean> => {
-    if (!currentPlan) return false;
-
+  const currentWorkout = currentPlan?.weeks[progress.currentWeek]?.days[progress.currentDay] ?? null;
+  const navigateWorkout = async (direction: number) => {
+    if (!currentPlan) return;
     try {
-      // Find the plan ID - we need to fetch it since we only store planData
-      const plansRes = await api.get<{ plans: { id: string }[] }>('/plans?active=true');
-      if (!plansRes.success || !plansRes.data?.plans.length) {
-        return false;
-      }
-
-      const planId = plansRes.data.plans[0].id;
-      const deleteRes = await api.delete(`/plans/${planId}`);
-
-      if (deleteRes.success) {
-        // Clear local state
-        setCurrentPlan(null);
-        setCurrentPlanId(null);
-        setProgress(DEFAULT_PROGRESS);
-        localStorage.removeItem('workout-progress');
-        return true;
-      }
-      return false;
-    } catch (err) {
-      console.error('Failed to delete plan:', err);
-      return false;
-    }
+      await flushLogs();
+      const next = { ...progressRef.current };
+      const week = currentPlan.weeks[next.currentWeek];
+      if (!week) return;
+      if (direction > 0) {
+        if (next.currentDay < week.days.length - 1) next.currentDay++;
+        else if (next.currentWeek < currentPlan.weeks.length - 1) { next.currentWeek++; next.currentDay = 0; }
+      } else if (next.currentDay > 0) next.currentDay--;
+      else if (next.currentWeek > 0) { next.currentWeek--; next.currentDay = currentPlan.weeks[next.currentWeek].days.length - 1; }
+      await saveProgress(next);
+      sessionRef.current = null; setCurrentSessionId(null); setSessionStartTime(null); setResumedSetLogs([]);
+    } catch (err) { setSyncMessage(message(err)); }
   };
-
-  return (
-    <WorkoutContext.Provider value={{
-      currentPlan,
-      currentPlanId,
-      progress,
-      currentWorkout: getCurrentWorkout(),
-      loading,
-      error,
-      currentSessionId,
-      sessionStartTime,
-      resumedSetLogs,
-      nextWorkout,
-      previousWorkout,
-      completeCurrentWorkout,
-      uncompleteWorkout,
-      resetProgress,
-      refreshData,
-      deletePlan,
-      startWorkoutSession,
-      logSetCompletion,
-      endWorkoutSession,
-    }}>
-      {children}
-    </WorkoutContext.Provider>
-  );
+  const completeCurrentWorkout = async () => {
+    if (!currentWorkout) throw new Error('Workout unavailable');
+    const next = { ...progressRef.current, completedWorkouts: [...new Set([...progressRef.current.completedWorkouts, currentWorkout.id])] };
+    await saveProgress(next);
+    if (completionKey) localStorage.removeItem(completionKey);
+    // Only clear the session after both server completion and progress acknowledgement.
+    sessionRef.current = null; setCurrentSessionId(null); setSessionStartTime(null); setResumedSetLogs([]);
+  };
+  const startWorkoutSession = (): Promise<string | null> => {
+    if (sessionRef.current) return Promise.resolve(sessionRef.current);
+    if (startRef.current) return startRef.current;
+    const start = async () => {
+      if (!currentWorkout || !currentPlanId) return null;
+      try {
+        const now = new Date();
+        const response = await sessionApi.startSession({ planId: currentPlanId, workoutDayId: currentWorkout.id,
+          weekNumber: progressRef.current.currentWeek + 1, dayNumber: progressRef.current.currentDay + 1,
+          workoutName: currentWorkout.name, startedAt: now.toISOString() });
+        if (!response.success || !response.data) throw new Error(response.error || 'Could not start workout');
+        const id = response.data.sessionId;
+        // Fetch authoritative original start time and sets, also on resumed sessions.
+        const detail = await sessionApi.getSessionDetail(id);
+        if (!detail.success || !detail.data) throw new Error(detail.error || 'Could not restore workout');
+        if (!alive.current) return null;
+        const began = new Date(detail.data.session.startedAt);
+        if (!Number.isFinite(began.getTime())) throw new Error('Workout start time is invalid');
+        sessionRef.current = id; setCurrentSessionId(id); setSessionStartTime(began);
+        setResumedSetLogs(detail.data.setLogs); setSyncMessage(null);
+        return id;
+      } catch (err) { if (alive.current) setSyncMessage(message(err)); return null; }
+    };
+    startRef.current = start().finally(() => { startRef.current = null; });
+    return startRef.current;
+  };
+  const logSetCompletion = async (data: SetLogData) => {
+    const id = sessionRef.current ?? await startWorkoutSession();
+    const queue = queueRef.current;
+    if (!id || !queue) throw new Error('Connect to start this workout before logging sets.');
+    const request: UpsertSetLogRequest = { ...data, loadType: data.loadType ?? 'external_weight', completed: true, loggedAt: new Date().toISOString() };
+    validateSetRequest(request);
+    queue.enqueue({ sessionId: id, request }); // Storage failure prevents advancing; no data silently lost.
+    try { await flushLogs(); } catch { setSyncMessage('Sets saved on this device. Reconnect and retry before finishing.'); }
+  };
+  const endWorkoutSession = async (totalSetsPlanned: number, totalSetsCompleted: number) => {
+    const id = sessionRef.current;
+    if (!id || !sessionStartTime) throw new Error('No active session. Please reconnect and resume.');
+    await flushLogs();
+    if (queueRef.current?.items().some(item => item.sessionId === id)) throw new Error('Some sets still need to sync. Retry when connected.');
+    if (!completionKey) throw new Error('Workout storage is unavailable. Please retry.');
+    localStorage.setItem(completionKey, JSON.stringify(id));
+    const completedAt = new Date();
+    const response = await sessionApi.completeSession(id, { completedAt: completedAt.toISOString(),
+      durationSeconds: Math.max(0, Math.floor((completedAt.getTime() - sessionStartTime.getTime()) / 1000)), totalSetsPlanned, totalSetsCompleted });
+    if (!response.success) throw new Error(response.error || 'Workout completion was not saved. Please retry.');
+  };
+  const resetProgress = () => { void saveProgress(DEFAULT_PROGRESS).catch(err => setSyncMessage(message(err))); };
+  const uncompleteWorkout = (id: string) => {
+    void saveProgress({ ...progressRef.current, completedWorkouts: progressRef.current.completedWorkouts.filter(value => value !== id) }).catch(err => setSyncMessage(message(err)));
+  };
+  const deletePlan = async () => {
+    if (!currentPlanId) return false;
+    try {
+      await flushLogs();
+      const response = await api.delete(`/plans/${currentPlanId}`);
+      if (!response.success) throw new Error(response.error || 'Could not delete plan');
+      if (storageKey) localStorage.removeItem(storageKey);
+      queueRef.current = null; setCurrentPlan(null); setCurrentPlanId(null);
+      progressRef.current = DEFAULT_PROGRESS; setProgress(DEFAULT_PROGRESS);
+      return true;
+    } catch (err) { setSyncMessage(message(err)); return false; }
+  };
+  return <WorkoutContext.Provider value={{ currentPlan, currentPlanId, progress, currentWorkout, loading, error, syncMessage,
+    currentSessionId, sessionStartTime, resumedSetLogs,
+    nextWorkout: () => { void navigateWorkout(1); }, previousWorkout: () => { void navigateWorkout(-1); },
+    completeCurrentWorkout, uncompleteWorkout, resetProgress, refreshData: loadFromApi, deletePlan,
+    startWorkoutSession, logSetCompletion, endWorkoutSession }}>{children}</WorkoutContext.Provider>;
 };

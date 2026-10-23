@@ -1,6 +1,6 @@
 // API client for Flexer backend
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8787';
+const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || 'http://localhost:8787';
 
 interface ApiResponse<T = unknown> {
   success: boolean;
@@ -9,61 +9,54 @@ interface ApiResponse<T = unknown> {
   validationErrors?: string[];
 }
 
-class ApiClient {
+export class ApiClient {
   private getToken: (() => Promise<string | null>) | null = null;
+  private authEpoch = 0;
 
-  setTokenGetter(getter: () => Promise<string | null>) {
+  setTokenGetter(getter: (() => Promise<string | null>) | null) {
+    this.authEpoch++;
     this.getToken = getter;
   }
 
   private async getHeaders(): Promise<HeadersInit> {
+    const epoch = this.authEpoch;
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
 
     if (this.getToken) {
       const token = await this.getToken();
+      if (epoch !== this.authEpoch) throw new Error("Account changed. Please retry.");
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
     }
 
+    if (!this.getToken) throw new Error("Sign in before loading your data.");
     return headers;
   }
 
-  async get<T>(path: string): Promise<ApiResponse<T>> {
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-      method: 'GET',
-      headers: await this.getHeaders(),
-    });
-    return response.json();
+  private async request<T>(method: string, path: string, body?: unknown): Promise<ApiResponse<T>> {
+    const epoch = this.authEpoch;
+    const headers = await this.getHeaders();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    try {
+      const response = await fetch(API_BASE_URL + path, {
+        method, headers, signal: controller.signal,
+        body: body === undefined ? undefined : JSON.stringify(body),
+      });
+      const result = await response.json() as ApiResponse<T>;
+      if (epoch !== this.authEpoch) throw new Error('Account changed. Please retry.');
+      if (!response.ok) return { ...result, success: false, error: result.error || 'Request failed. Please retry.' };
+      return result;
+    } finally { clearTimeout(timer); }
   }
+  get<T>(path: string) { return this.request<T>('GET', path); }
+  post<T>(path: string, body?: unknown) { return this.request<T>('POST', path, body); }
+  put<T>(path: string, body?: unknown) { return this.request<T>('PUT', path, body); }
+  delete<T>(path: string) { return this.request<T>('DELETE', path); }
 
-  async post<T>(path: string, body?: unknown): Promise<ApiResponse<T>> {
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-      method: 'POST',
-      headers: await this.getHeaders(),
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    return response.json();
-  }
-
-  async put<T>(path: string, body?: unknown): Promise<ApiResponse<T>> {
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-      method: 'PUT',
-      headers: await this.getHeaders(),
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    return response.json();
-  }
-
-  async delete<T>(path: string): Promise<ApiResponse<T>> {
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-      method: 'DELETE',
-      headers: await this.getHeaders(),
-    });
-    return response.json();
-  }
 }
 
 export const api = new ApiClient();

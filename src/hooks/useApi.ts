@@ -1,13 +1,4 @@
-import { useEffect } from 'react';
-import { useAuth } from '@clerk/clerk-react';
 import { api } from '../services/api';
 
-export function useApi() {
-  const { getToken } = useAuth();
-
-  useEffect(() => {
-    api.setTokenGetter(getToken);
-  }, [getToken]);
-
-  return api;
-}
+// Authenticated routes mount only after ApiAuthBoundary initializes the client.
+export function useApi() { return api; }

@@ -80,6 +80,16 @@ export function PrivacyPolicyPage() {
         </section>
 
         <section className="privacy-section">
+          <h2>Deleting Flexer Data</h2>
+          <p>
+            Profile settings let you delete your Flexer profile, workout plans and recorded workout history.
+            This removes the data from Flexer and clears this account's saved workout data on the current device.
+            Your Clerk sign-in identity is retained; deleting Flexer data does not delete that identity.
+            Other devices may retain cached data until you clear their browser storage.
+          </p>
+        </section>
+
+        <section className="privacy-section">
           <h2>Changes to This Policy</h2>
           <p>
             We may update this privacy policy from time to time. We will notify you of any 

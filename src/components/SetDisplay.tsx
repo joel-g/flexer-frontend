@@ -15,7 +15,7 @@ interface SetDisplayProps {
   exercise: Exercise;
   setNumber: number;
   totalSets: number;
-  onComplete: (data: SetCompletionData) => void;
+  onComplete: (data: SetCompletionData) => void | Promise<void>;
   onBack?: () => void;
 }
 
@@ -27,6 +27,7 @@ export const SetDisplay: React.FC<SetDisplayProps> = ({
   onBack
 }) => {
   const [isCompleted, setIsCompleted] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Parse target reps and weight for defaults
   const parseTargetReps = (): number | undefined => {
@@ -128,10 +129,10 @@ export const SetDisplay: React.FC<SetDisplayProps> = ({
     setIsCompleted(false);
   }, [exercise.id, setNumber]);
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     setIsCompleted(true);
-    // Small delay to show completion state before moving on
-    setTimeout(() => {
+    setSaveError(null);
+    try {
       const data: SetCompletionData = {};
 
       // Reps-based exercises
@@ -161,12 +162,16 @@ export const SetDisplay: React.FC<SetDisplayProps> = ({
         data.actualDistanceUnit = distanceUnit;
       }
 
-      onComplete(data);
-    }, 500);
+      await onComplete(data);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Set could not be saved. Please retry.');
+      setIsCompleted(false);
+    }
   };
 
   return (
     <div className="set-display">
+      {saveError && <p role="alert">{saveError}</p>}
       {/* Progress indicator */}
       <div className="set-progress-indicator">
         <div className="set-progress-text">

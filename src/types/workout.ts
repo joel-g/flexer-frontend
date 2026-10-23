@@ -129,6 +129,7 @@ export type WeightUnit = 'lbs' | 'kg';
 
 export interface WorkoutSession {
   id: string;
+  planId: string;
   workoutDayId: string;
   workoutName: string;
   weekNumber: number;

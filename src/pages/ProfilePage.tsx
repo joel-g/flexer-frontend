@@ -1,6 +1,8 @@
+import { clearAccountStorage, readPending, LEGACY_QUEUE_KEY, type PendingSet } from '../services/workoutStorage';
+import { sessionApi } from '../services/api';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useClerk } from '@clerk/clerk-react';
+import { useClerk, useAuth } from '@clerk/clerk-react';
 import { useApi } from '../hooks/useApi';
 import { useTheme } from '../context/ThemeContext';
 import { themes, themeIds } from '../data/themes';
@@ -23,6 +25,7 @@ export function ProfilePage() {
   const api = useApi();
   const navigate = useNavigate();
   const { signOut } = useClerk();
+  const { userId } = useAuth();
   const { themeId, setTheme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -141,7 +144,7 @@ export function ProfilePage() {
 
   async function handleSignOut() {
     await signOut();
-    navigate('/sign-in');
+    navigate('/');
   }
 
   async function handleDeleteAccount() {
@@ -151,20 +154,27 @@ export function ProfilePage() {
     setError(null);
 
     try {
+      const ownedLegacy: PendingSet[] = [];
+      for (const item of readPending(localStorage, LEGACY_QUEUE_KEY)) {
+        const detail = await sessionApi.getSessionDetail(item.sessionId);
+        if (detail.success) ownedLegacy.push(item);
+        else if (detail.error !== 'Session not found or unauthorized') {
+          throw new Error('Could not verify saved device logs. Reconnect before deleting your Flexer data.');
+        }
+      }
       const res = await api.delete('/profile');
       if (!res.success) {
-        throw new Error(res.error || 'Failed to delete account');
+        throw new Error(res.error || 'Failed to delete Flexer data');
       }
 
       // Clear any local storage data
-      localStorage.removeItem('flexer_progress');
-      localStorage.removeItem('flexer_theme');
+      if (userId) clearAccountStorage(localStorage, userId, ownedLegacy);
 
       // Sign out and redirect
       await signOut();
       navigate('/sign-in');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete account');
+      setError(err instanceof Error ? err.message : 'Failed to delete Flexer data');
       setDeleting(false);
     }
   }
@@ -361,18 +371,18 @@ export function ProfilePage() {
           </button>
 
           <div className="delete-account-section">
-            <h3>Delete Account</h3>
+            <h3>Delete Flexer Data</h3>
             {!showDeleteConfirm ? (
               <>
                 <p className="delete-warning">
-                  Permanently delete your account and all associated data including your personal details,
+                  Permanently delete your Flexer profile, plans and recorded data including your personal details,
                   workout history, and any health information you've provided.
                 </p>
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
                   className="btn btn-danger"
                 >
-                  Delete My Account
+                  Delete My Flexer Data
                 </button>
               </>
             ) : (
@@ -384,10 +394,10 @@ export function ProfilePage() {
                   <li>Your personal details (age, height, weight)</li>
                   <li>Health and injury information</li>
                   <li>All workout plans and history</li>
-                  <li>Your account and profile</li>
+                  <li>Your Flexer profile</li>
                 </ul>
                 <p className="delete-confirm-note">
-                  We will not retain any of this information. You're welcome to sign up again anytime.
+                  Your Clerk sign-in identity is retained. You will be signed out and can sign in again to create a new Flexer profile.
                 </p>
                 <p className="delete-confirm-instruction">
                   Type <strong>DELETE</strong> to confirm:
