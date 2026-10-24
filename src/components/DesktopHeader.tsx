@@ -2,10 +2,12 @@ import { useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useClerk, useUser } from "@clerk/clerk-react";
 import { AppIcon } from "./AppIcon";
+import { useRunning } from '../running/useRunning';
 
 export function DesktopHeader() {
   const navigate = useNavigate();
   const { signOut } = useClerk();
+  const { prepareSignout } = useRunning();
   const { user } = useUser();
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState("");
@@ -13,10 +15,11 @@ export function DesktopHeader() {
     setSigningOut(true);
     setError("");
     try {
+      if (!await prepareSignout()) { setSigningOut(false); return; }
       await signOut();
       navigate("/");
-    } catch {
-      setError("Sign out failed. Please try again.");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Sign out failed. Please try again.");
       setSigningOut(false);
     }
   }
@@ -24,6 +27,7 @@ export function DesktopHeader() {
     user?.firstName?.[0] || user?.emailAddresses?.[0]?.emailAddress?.[0] || "F";
   const links = [
     { to: "/dashboard", name: "Today", icon: "today" },
+    { to: "/running", name: "Running", icon: "clock" },
     { to: "/plan", name: "My plan", icon: "plan" },
     { to: "/history", name: "History", icon: "history" },
     { to: "/onboarding", name: "Build a plan", icon: "build" },

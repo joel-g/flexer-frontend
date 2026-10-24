@@ -39,6 +39,7 @@ export function ResponsiveLayout({
             flexer.
           </Link>
           <span className="training-motto">TRAIN WITH INTENTION</span>
+          {isSignedIn && <Link to="/running" className="topline-account">Running</Link>}
           <Link to="/profile" className="topline-account">
             Your training, your pace
           </Link>

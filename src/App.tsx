@@ -15,6 +15,8 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import './App.css';
 import './production.css';
+import { RunningProvider } from './running/RunningContext';
+import { RunningPage } from './running/RunningPage';
 
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -73,6 +75,7 @@ function AppRoutes() {
         <Route path="/plan" element={<PlanOverviewPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/history" element={<HistoryPage />} />
+        <Route path="/running" element={<RunningPage />} />
       </Route>
 
       {/* Catch-all redirect */}
@@ -97,7 +100,7 @@ function App() {
     <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
       <ThemeProvider>
         <BrowserRouter>
-          <ApiAuthBoundary><AppRoutes /></ApiAuthBoundary>
+          <ApiAuthBoundary><RunningProvider><AppRoutes /></RunningProvider></ApiAuthBoundary>
         </BrowserRouter>
       </ThemeProvider>
     </ClerkProvider>

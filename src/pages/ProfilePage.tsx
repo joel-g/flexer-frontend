@@ -1,4 +1,5 @@
 import { clearAccountStorage, readPending, LEGACY_QUEUE_KEY, type PendingSet } from '../services/workoutStorage';
+import { useRunning } from '../running/useRunning';
 import { sessionApi } from '../services/api';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -22,6 +23,7 @@ const EQUIPMENT_OPTIONS = [
 ];
 
 export function ProfilePage() {
+    const { prepareSignout } = useRunning();
   const api = useApi();
   const navigate = useNavigate();
   const { signOut } = useClerk();
@@ -150,8 +152,8 @@ export function ProfilePage() {
   }
 
   async function handleSignOut() {
-    await signOut();
-    navigate('/');
+    try { if (!await prepareSignout()) return; await signOut(); navigate('/'); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : 'Sign out failed.'); }
   }
 
   async function handleDeleteAccount() {
@@ -160,7 +162,8 @@ export function ProfilePage() {
     setDeleting(true);
     setError(null);
 
-    try {
+      let serverDeleted = false;
+      try {
       const ownedLegacy: PendingSet[] = [];
       for (const item of readPending(localStorage, LEGACY_QUEUE_KEY)) {
         const detail = await sessionApi.getSessionDetail(item.sessionId);
@@ -173,15 +176,17 @@ export function ProfilePage() {
       if (!res.success) {
         throw new Error(res.error || 'Failed to delete Flexer data');
       }
+        serverDeleted = true;
 
       // Clear any local storage data
+        await prepareSignout(true);
       if (userId) clearAccountStorage(localStorage, userId, ownedLegacy);
 
       // Sign out and redirect
       await signOut();
       navigate('/sign-in');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete Flexer data');
+        setError(serverDeleted ? 'Your Flexer server data was deleted, but device cleanup or signout failed. Private running data remains paused. Retry signout to finish device cleanup.' : err instanceof Error ? err.message : 'Failed to delete Flexer data');
       setDeleting(false);
     }
   }

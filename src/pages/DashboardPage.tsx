@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { RunningCard } from '../running/RunningCard';
 import { useApi } from "../hooks/useApi";
 import { analyticsApi } from "../services/api";
 import { changelog } from "../data/changelog";
@@ -13,7 +14,7 @@ import type {
 
 export function DashboardPage() {
   const api = useApi();
-  const navigate = useNavigate();
+  const [strengthSetup, setStrengthSetup] = useState(false);
   const [plan, setPlan] = useState<PlanResponse | null>(null);
   const [progress, setProgress] = useState<WorkoutProgress | null>(null);
   const [consistency, setConsistency] = useState<ConsistencyAnalytics | null>(
@@ -30,12 +31,14 @@ export function DashboardPage() {
       const status = await api.get<{ completed: boolean }>(
         "/profile/onboarding-status",
       );
-      if (!status.success || !status.data)
+      if (!status.success || !status.data || typeof status.data.completed !== 'boolean')
         throw new Error("Your account could not be loaded. Please try again.");
       if (!status.data.completed) {
-        navigate("/onboarding", { replace: true });
+        setStrengthSetup(true);
+        setPlan(null); setProgress(null);
         return;
       }
+      setStrengthSetup(false);
       const [plansRes, progressRes] = await Promise.all([
         api.get<{ plans: PlanResponse[] }>("/plans?active=true"),
         api.get<WorkoutProgress>("/progress"),
@@ -68,7 +71,7 @@ export function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [api, navigate]);
+  }, [api]);
   useEffect(() => {
     void loadData();
   }, [loadData]);
@@ -105,6 +108,7 @@ export function DashboardPage() {
             </Link>
           )}
         </header>
+        <RunningCard />
         {loading ? (
           <section className="training-state" role="status">
             <div className="spinner" aria-hidden="true" />
@@ -124,7 +128,7 @@ export function DashboardPage() {
         ) : !plan ? (
           <section className="training-state">
             <p className="training-eyebrow">A FRESH START</p>
-            <h2>Your next chapter starts with a plan.</h2>
+            <h2>{strengthSetup ? 'Add strength training when you are ready.' : 'Your next chapter starts with a plan.'}</h2>
             <p>
               Build a prompt around your goals, then import your training plan.
             </p>
