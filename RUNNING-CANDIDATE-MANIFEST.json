@@ -1,37 +1,12 @@
 {
-  "createdAt": "2026-10-24T00:56:28.825403+00:00",
-  "state": "candidate-awaiting-browser-positive-auth-R20-review",
+  "createdAt": "2026-10-24T01:22:51.2213982Z",
+  "state": "local candidate with uncommitted fixture-only conflict fix; production unchanged; browser/Clerk/R20 gates pending",
   "baseHEAD": "792d62ff1b8aae509b92cdf080f23f36da1533a9",
   "branch": "feature/running-client-v1",
   "worktree": "C:\\Users\\shayn\\Documents\\Codex\\2026-10-22\\task-2\\running-frontend",
   "gitStatus": [
-    " M .gitignore",
-    " M src/App.tsx",
-    " M src/components/DesktopHeader.tsx",
-    " M src/components/ResponsiveLayout.tsx",
-    " M src/pages/DashboardPage.tsx",
-    " M src/pages/ProfilePage.tsx",
-    "?? RUNNING-BROWSER-HANDOFF.md",
-    "?? RUNNING-R07.md",
-    "?? RUNNING-R08-R09.md",
-    "?? RUNNING-R10.md",
-    "?? RUNNING-R12-R17-INTEGRATION.md",
-    "?? RUNNING-R13-SCAFFOLD.md",
-    "?? RUNNING-R16.md",
-    "?? RUNNING-R17-CONTROLS.md",
-    "?? fixture.html",
-    "?? src/running/",
-    "?? tests/fixtures/",
-    "?? tests/running-client.test.mjs",
-    "?? tests/running-controller.test.mjs",
-    "?? tests/running-draft.test.mjs",
-    "?? tests/running-history-ui.test.cjs",
-    "?? tests/running-history-validation.test.mjs",
-    "?? tests/running-plan-actions.test.cjs",
-    "?? tests/running-queue.test.mjs",
-    "?? tests/ui/",
-    "?? vite.fixture.config.ts",
-    " M src/production.css"
+    " M tests/ui/fixture.tsx",
+    "?? tests/running-mock-conflict.test.mjs"
   ],
   "uncommitted": true,
   "deployed": false,
@@ -40,10 +15,12 @@
     "frontendTests": 89,
     "independentRegressionTests": 5,
     "eslint": "0 errors; 3 existing Profile hook warnings",
-    "productionBuild": "passed; existing large chunk warning",
-    "fixtureBuild": "passed after mobile navigation CSS change",
-    "testCountExplanation": "94 total = 89 repository tests + 5 sibling running-review recovery/drain tests, rerun separately.",
-    "browser": "blocked: current tool inventory has neither node_repl nor cua_repl; source and HTTP evidence is not browser QA"
+    "productionBuild": "prior build passed; all four current files match previous candidate hashes; no production rebuild or broad tests rerun",
+    "fixtureBuild": "passed current fixture-only conflict fix; production build unchanged",
+    "testCountExplanation": "Historical evidence: 89 repository tests + 5 sibling independent regressions. New execution: 3 targeted mock conflict tests passed; no claim that a broad 92-test suite was rerun.",
+    "browser": "Rendered public mock QA in progress; full Worker-backed browser and actual Clerk positive-path gates remain distinct and pending.",
+    "targetedMockConflictTests": 3,
+    "priorApplicationSourceHashesUnchanged": true
   },
   "exclusions": [
     ".env and local env files excluded from source archive; reuse approved deployment configuration only",
@@ -395,6 +372,10 @@
       "sha256": "C96D20FAB894FB5A9CC63433E0074C98C56F17AB49182CE51FA319772D632661"
     },
     {
+      "path": "tests/running-mock-conflict.test.mjs",
+      "sha256": "1B4A825BEFDA9B2314EAFBF6622F13D9608FF4B4C4F83E73FBCF4E333D431ADA"
+    },
+    {
       "path": "tests/running-plan-actions.test.cjs",
       "sha256": "F4EC3CB90AE90504D922B5A03BA40E62003C08990D0AF42B1AB94DB10C748A56"
     },
@@ -408,7 +389,7 @@
     },
     {
       "path": "tests/ui/fixture.tsx",
-      "sha256": "C6371CB06E2DFA6FFA3D052AD1251EE30FC374AF913C969EBCEA0961585E6C05"
+      "sha256": "346A938DC56713A608C9FF81751EAC48C7883F039EBD689BB4970FBC2E2CA7F5"
     },
     {
       "path": "tests/ui/workerTransport.ts",
@@ -459,8 +440,8 @@
   ],
   "fixtureFiles": [
     {
-      "path": "assets/fixture-DDRaxR3H.js",
-      "sha256": "BA27C4C57CAAD648B0217441F34D75D60CD629A2913920D3A71A6CF8969EDE76"
+      "path": "assets/fixture-BzSa7xY2.js",
+      "sha256": "CEA297FE3FBE830C851360F750BBBB4FEBDAF483859065F04B18BA9E5068F5BE"
     },
     {
       "path": "assets/fixture-E2j7acyP.css",
@@ -472,25 +453,29 @@
     },
     {
       "path": "fixture.html",
-      "sha256": "4FA47BE7AFD4B53CC0F48B56D209F2E7B00720CF6A6F404E15587D9D3531FBF3"
+      "sha256": "60A3FE5B92605C6BB2B3F347C88CC58622479AAF12B6E50207AE7C499F7F0D5B"
     }
   ],
   "artifacts": [
     {
-      "path": "C:\\Users\\shayn\\Documents\\Codex\\2026-10-22\\task-2\\running-frontend\\.running-cache\\release-candidate\\20261024T005628Z\\running-frontend-source.zip",
-      "sha256": "70C7D700D76E59B6B6E97AF3B471201B895131779A158A10EB9C817C2DB4D405"
+      "path": "C:\\Users\\shayn\\Documents\\Codex\\2026-10-22\\task-2\\running-frontend\\.running-cache\\release-candidate\\20261024T012250Z\\running-frontend-source.zip",
+      "sha256": "FB9C7CDD18E3F9088EC528519E8065793DFC77FF7984FA84E40C86786D30B32B",
+      "entries": 98
     },
     {
-      "path": "C:\\Users\\shayn\\Documents\\Codex\\2026-10-22\\task-2\\running-frontend\\.running-cache\\release-candidate\\20261024T005628Z\\running-frontend-build.zip",
-      "sha256": "3FF1D0796FEF9325E5564A38E49509498376109C4C872C7B365C86AE218B5CE2"
+      "path": "C:\\Users\\shayn\\Documents\\Codex\\2026-10-22\\task-2\\running-frontend\\.running-cache\\release-candidate\\20261024T012250Z\\running-frontend-build.zip",
+      "sha256": "B20420AD2837AB5B3595BD91151352200864D9EB13E685023AB303CA226A7ABA",
+      "entries": 4
     },
     {
-      "path": "C:\\Users\\shayn\\Documents\\Codex\\2026-10-22\\task-2\\running-frontend\\.running-cache\\release-candidate\\20261024T005628Z\\running-fixture-build.zip",
-      "sha256": "24410AB6DF56E13841D18A09A998A3DC4DC3BD584A798330461BCE7D07CFF80E"
+      "path": "C:\\Users\\shayn\\Documents\\Codex\\2026-10-22\\task-2\\running-frontend\\.running-cache\\release-candidate\\20261024T012250Z\\running-fixture-build.zip",
+      "sha256": "057C0AF839A6DA6EDE1BD0B3335E7D04B13B21E22D8BEF4ECF823A6556E324CF",
+      "entries": 4
     },
     {
-      "path": "C:\\Users\\shayn\\Documents\\Codex\\2026-10-22\\task-2\\running-frontend\\.running-cache\\release-candidate\\20261024T005628Z\\running-contract.zip",
-      "sha256": "20BA94E12A902318F58D65E12F3E6A7BD1D826AA80882B5F59D10A2710B44AFA"
+      "path": "C:\\Users\\shayn\\Documents\\Codex\\2026-10-22\\task-2\\running-frontend\\.running-cache\\release-candidate\\20261024T012250Z\\running-contract.zip",
+      "sha256": "4F3D2707B8A68E6EA5630964A9EC335189D33B32E8E92DD264B49EEA6E4799E7",
+      "entries": 16
     }
   ],
   "fixture": {
@@ -573,8 +558,18 @@
     }
   ],
   "reproductionNote": "Extract source and running-contract archives beside each other; tests reference sibling frozen running-contract. Reuse reviewed existing dependencies/configuration; .env intentionally excluded.",
-  "previousManifestSha256": "76F526179C00C55A69E261113D589D5960002D2F13A4AA764BF625BE33B3B7BE",
+  "previousManifestSha256": "0DDC13BF2AAF1C6E38AED63AC2625C8BA02A11D473A02AC8A41B18E73AEA803E",
   "candidateChanges": [
-    "Mobile navigation grid updated from five to six columns so Profile remains in the fixed bottom row; rendered retest pending."
-  ]
+    "Fixture-only: distinct mock draft ID; exact owned plan GET chooses active resource first for legacy ID collisions and rejects unknown IDs.",
+    "Three new targeted regressions cover exact active/draft resources, legacy collision and conflict/Undo durable queue reconciliation.",
+    "Application source and production build hashes unchanged; fixture build refreshed. External checkpoint will record the final commit including this manifest."
+  ],
+  "currentHEAD": "1d8e155b5034f76cbc461ae8e63d33f6b3c91c67",
+  "sourceFileCount": 98,
+  "sourceDeltaFromPreviousManifest": [
+    "tests/running-mock-conflict.test.mjs",
+    "tests/ui/fixture.tsx"
+  ],
+  "fixtureProcessMetadataHistorical": true,
+  "fixtureBuildScope": "Vite fixture build only; public Pages preview packaging/index and headers are separate root-controlled artifacts."
 }
