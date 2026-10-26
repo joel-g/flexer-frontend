@@ -20,6 +20,8 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
+      // Context hooks deliberately share their provider module; consumers remount at the auth boundary.
+      'react-refresh/only-export-components': ['error', { allowConstantExport: true, allowExportNames: ['useWorkout', 'useTheme'] }],
       // Enforce type-only imports to match verbatimModuleSyntax in tsconfig
       '@typescript-eslint/consistent-type-imports': [
         'error',

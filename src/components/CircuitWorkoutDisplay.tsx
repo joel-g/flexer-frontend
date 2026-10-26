@@ -25,7 +25,7 @@ interface WorkoutSet {
   exerciseIndex: number;
 }
 
-type WorkoutState = 'exercise' | 'rest' | 'completed';
+type WorkoutState = 'exercise' | 'rest' | 'finishing' | 'completed';
 
 export const CircuitWorkoutDisplay: React.FC = () => {
   const {
@@ -34,6 +34,7 @@ export const CircuitWorkoutDisplay: React.FC = () => {
     currentPlan,
     loading,
     error,
+    syncMessage,
     nextWorkout,
     previousWorkout,
     completeCurrentWorkout,
@@ -46,6 +47,9 @@ export const CircuitWorkoutDisplay: React.FC = () => {
 
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
   const [workoutState, setWorkoutState] = useState<WorkoutState>('exercise');
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const completedPairsRef = useRef(new Set<string>());
   const [isSharing, setIsSharing] = useState(false);
   const [completedSetsCount, setCompletedSetsCount] = useState(0);
   const shareCardRef = useRef<HTMLDivElement>(null);
@@ -53,7 +57,7 @@ export const CircuitWorkoutDisplay: React.FC = () => {
 
   // Start session when workout begins
   useEffect(() => {
-    if (currentWorkout && !currentSessionId && !sessionStartedRef.current && workoutState === 'exercise') {
+    if (!loading && currentWorkout && !currentSessionId && !sessionStartedRef.current && workoutState === 'exercise') {
       sessionStartedRef.current = true;
       startWorkoutSession().then((sessionId) => {
         if (!sessionId) {
@@ -61,13 +65,16 @@ export const CircuitWorkoutDisplay: React.FC = () => {
         }
       });
     }
-  }, [currentWorkout, currentSessionId, workoutState]);
+  }, [loading, currentWorkout, currentSessionId, workoutState, startWorkoutSession]);
 
   // Reset session ref when workout changes
   useEffect(() => {
     sessionStartedRef.current = false;
     setCompletedSetsCount(0);
     setCurrentSetIndex(0);
+    setWorkoutState('exercise');
+    setSaveError(null);
+    completedPairsRef.current.clear();
   }, [currentWorkout?.id]);
 
   // Ref to track if resume has been applied
@@ -105,7 +112,7 @@ export const CircuitWorkoutDisplay: React.FC = () => {
   // Restore position from resumed set logs (must be after workoutSets memo)
   useEffect(() => {
     // Only apply resume once per session, when we have both set logs and workout sets
-    if (resumedSetLogs.length > 0 && workoutSets.length > 0 && !resumeAppliedRef.current) {
+    if (!loading && resumedSetLogs.length > 0 && workoutSets.length > 0 && !resumeAppliedRef.current) {
       resumeAppliedRef.current = true;
 
       // Build a set of completed (exerciseId, setNumber) pairs from resumed logs
@@ -126,6 +133,7 @@ export const CircuitWorkoutDisplay: React.FC = () => {
       }
 
       // Restore state
+      completedPairsRef.current = completedPairs;
       const completedCount = completedPairs.size;
       console.log(`Resuming workout: ${completedCount} sets completed, starting at set ${resumeIndex + 1}`);
 
@@ -134,10 +142,10 @@ export const CircuitWorkoutDisplay: React.FC = () => {
 
       // If all sets were completed, mark workout as completed
       if (resumeIndex >= workoutSets.length) {
-        setWorkoutState('completed');
+        setWorkoutState('finishing');
       }
     }
-  }, [resumedSetLogs, workoutSets]);
+  }, [loading, resumedSetLogs, workoutSets]);
 
   // Show loading state
   if (loading) {
@@ -193,47 +201,38 @@ export const CircuitWorkoutDisplay: React.FC = () => {
     );
   }
 
-  const handleSetComplete = async (data: SetCompletionData) => {
-    // Log the set completion
-    if (currentSessionId) {
-      await logSetCompletion({
-        exerciseId: currentSet.exercise.id,
-        exerciseName: currentSet.exercise.name,
-        setNumber: currentSet.setNumber,
-        targetReps: currentSet.exercise.reps,
-        targetWeight: currentSet.exercise.weight,
-        actualReps: data.actualReps,
-        actualWeightValue: data.actualWeightValue,
-        actualWeightUnit: data.actualWeightUnit,
-        actualDurationSeconds: data.actualDurationSeconds,
-        actualDistanceValue: data.actualDistanceValue,
-        actualDistanceUnit: data.actualDistanceUnit,
-        qualitativeLoadLabel: data.qualitativeLoadLabel,
-        loadType: getExerciseLoadType(currentSet.exercise),
-      });
-    }
-    setCompletedSetsCount(prev => prev + 1);
-
-    if (isLastSet) {
-      // End session before completing workout
-      const totalSets = workoutSets.length;
-      await endWorkoutSession(totalSets, completedSetsCount + 1);
-      // Workout completed
-      setWorkoutState('completed');
+  const finishWorkout = async (count: number) => {
+    setIsSaving(true); setSaveError(null);
+    try {
+      await endWorkoutSession(workoutSets.length, count);
       await completeCurrentWorkout();
-    } else {
-      // Check if we need rest time
-      const nextSet = workoutSets[currentSetIndex + 1];
-      const shouldRest = currentSet.exercise.restSeconds &&
-                        currentSet.exercise.restSeconds > 0 &&
-                        nextSet?.exercise.id !== currentSet.exercise.id; // Only rest between different exercises
+      setWorkoutState('completed');
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Completion was not saved. Please retry.');
+    } finally { setIsSaving(false); }
+  };
 
-      if (shouldRest) {
-        setWorkoutState('rest');
-      } else {
-        // Move to next set immediately
-        setCurrentSetIndex(prev => prev + 1);
-      }
+  const handleSetComplete = async (data: SetCompletionData) => {
+    if (!currentSet || isSaving) return;
+    setSaveError(null);
+    // logSetCompletion persists on this device before allowing advancement.
+    await logSetCompletion({
+      exerciseId: currentSet.exercise.id, exerciseName: currentSet.exercise.name,
+      setNumber: currentSet.setNumber, targetReps: currentSet.exercise.reps,
+      targetWeight: currentSet.exercise.weight, ...data,
+      loadType: getExerciseLoadType(currentSet.exercise),
+    });
+    completedPairsRef.current.add(currentSet.exercise.id + ':' + currentSet.setNumber);
+    const count = completedPairsRef.current.size;
+    setCompletedSetsCount(count);
+    if (isLastSet) {
+      setWorkoutState('finishing');
+      await finishWorkout(count);
+    } else {
+      const nextSet = workoutSets[currentSetIndex + 1];
+      const shouldRest = currentSet.exercise.restSeconds && currentSet.exercise.restSeconds > 0 && nextSet?.exercise.id !== currentSet.exercise.id;
+      if (shouldRest) setWorkoutState('rest');
+      else setCurrentSetIndex(prev => prev + 1);
     }
   };
 
@@ -304,6 +303,16 @@ export const CircuitWorkoutDisplay: React.FC = () => {
       setIsSharing(false);
     }
   };
+
+  if (workoutState === 'finishing') {
+    return <div className="completion-screen">
+      <h2>{isSaving ? 'Saving your workout...' : 'Finish your workout'}</h2>
+      <p role="status">{saveError || syncMessage || 'Your sets are logged. Confirm completion to save this workout.'}</p>
+      <button className="btn btn-primary" disabled={isSaving} onClick={() => { void finishWorkout(completedSetsCount); }}>
+        {isSaving ? 'Saving...' : 'Save Completed Workout'}
+      </button>
+    </div>;
+  }
 
   // Workout completed state
   if (workoutState === 'completed') {
@@ -407,6 +416,7 @@ export const CircuitWorkoutDisplay: React.FC = () => {
         </div>
       </div>
 
+      {syncMessage && <p role="status">{syncMessage}</p>}
       <SetDisplay
         key={currentSetIndex}
         exercise={currentSet.exercise}
@@ -419,7 +429,7 @@ export const CircuitWorkoutDisplay: React.FC = () => {
       {/* Show what's coming next */}
       {!isLastSet && (
         <div className="next-set-preview">
-          <h4>Next up:</h4>
+          <h3>Next up</h3>
           <p>
             {workoutSets[currentSetIndex + 1].exercise.name} - 
             Set {workoutSets[currentSetIndex + 1].setNumber} of {workoutSets[currentSetIndex + 1].exercise.sets}

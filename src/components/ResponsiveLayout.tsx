@@ -1,23 +1,58 @@
-import type { ReactNode } from 'react';
-import { SignedIn } from '@clerk/clerk-react';
-import { DesktopHeader } from './DesktopHeader';
-
+import { useEffect, useRef, type ReactNode } from "react";
+import { SignedIn, useAuth } from "@clerk/clerk-react";
+import { Link, useLocation } from "react-router-dom";
+import { DesktopHeader } from "./DesktopHeader";
 interface ResponsiveLayoutProps {
   children: ReactNode;
   showHeader?: boolean;
 }
-
-export function ResponsiveLayout({ children, showHeader = true }: ResponsiveLayoutProps) {
+export function ResponsiveLayout({
+  children,
+  showHeader = true,
+}: ResponsiveLayoutProps) {
+  const { pathname } = useLocation();
+  const { isSignedIn } = useAuth();
+  const main = useRef<HTMLElement>(null);
+  useEffect(() => {
+    main.current?.focus();
+  }, [pathname]);
+  const withNavigation = showHeader && isSignedIn;
   return (
-    <div className="responsive-layout">
+    <div
+      className={`training-shell ${withNavigation ? "with-navigation" : ""}`}
+    >
+      <a className="training-skip" href="#main-content">
+        Skip to content
+      </a>
       {showHeader && (
         <SignedIn>
           <DesktopHeader />
         </SignedIn>
       )}
-      <main className="responsive-main">
-        {children}
-      </main>
+      <div className="training-workspace">
+        <header className="training-topline">
+          <Link
+            to={isSignedIn ? "/dashboard" : "/"}
+            className="mobile-brand"
+            aria-label="Flexer home"
+          >
+            flexer.
+          </Link>
+          <span className="training-motto">TRAIN WITH INTENTION</span>
+          {isSignedIn && <Link to="/running" className="topline-account">Running</Link>}
+          <Link to="/profile" className="topline-account">
+            Your training, your pace
+          </Link>
+        </header>
+        <main
+          ref={main}
+          id="main-content"
+          className="responsive-main"
+          tabIndex={-1}
+        >
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

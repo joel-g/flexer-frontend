@@ -1,6 +1,9 @@
+import { clearAccountStorage, readPending, LEGACY_QUEUE_KEY, type PendingSet } from '../services/workoutStorage';
+import { useRunning } from '../running/useRunning';
+import { sessionApi } from '../services/api';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useClerk } from '@clerk/clerk-react';
+import { useClerk, useAuth } from '@clerk/clerk-react';
 import { useApi } from '../hooks/useApi';
 import { useTheme } from '../context/ThemeContext';
 import { themes, themeIds } from '../data/themes';
@@ -20,11 +23,14 @@ const EQUIPMENT_OPTIONS = [
 ];
 
 export function ProfilePage() {
+    const { prepareSignout } = useRunning();
   const api = useApi();
   const navigate = useNavigate();
   const { signOut } = useClerk();
+  const { userId } = useAuth();
   const { themeId, setTheme } = useTheme();
   const [loading, setLoading] = useState(true);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -78,13 +84,18 @@ export function ProfilePage() {
   async function loadProfile() {
     try {
       setLoading(true);
+      setError(null);
       const res = await api.get<UserProfile>('/profile');
+      // The API creates a first-time user's profile on PUT.
+      if (!res.success && res.error === 'User not found') { setProfileLoaded(true); return; }
+      if (!res.success || !res.data) throw new Error(res.error || 'Failed to load profile');
 
       if (res.success && res.data) {
         setAge(res.data.age);
         setHeightCm(res.data.heightCm);
         setWeightKg(res.data.weightKg);
         setEquipment(res.data.equipmentAvailable || []);
+        setProfileLoaded(true);
 
         // Initialize imperial display values
         if (res.data.heightCm) {
@@ -105,6 +116,7 @@ export function ProfilePage() {
   }
 
   async function saveProfile() {
+    if (!profileLoaded) return;
     setSaving(true);
     setError(null);
     setSuccess(false);
@@ -140,8 +152,8 @@ export function ProfilePage() {
   }
 
   async function handleSignOut() {
-    await signOut();
-    navigate('/sign-in');
+    try { if (!await prepareSignout()) return; await signOut(); navigate('/'); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : 'Sign out failed.'); }
   }
 
   async function handleDeleteAccount() {
@@ -150,21 +162,31 @@ export function ProfilePage() {
     setDeleting(true);
     setError(null);
 
-    try {
+      let serverDeleted = false;
+      try {
+      const ownedLegacy: PendingSet[] = [];
+      for (const item of readPending(localStorage, LEGACY_QUEUE_KEY)) {
+        const detail = await sessionApi.getSessionDetail(item.sessionId);
+        if (detail.success) ownedLegacy.push(item);
+        else if (detail.error !== 'Session not found or unauthorized') {
+          throw new Error('Could not verify saved device logs. Reconnect before deleting your Flexer data.');
+        }
+      }
       const res = await api.delete('/profile');
       if (!res.success) {
-        throw new Error(res.error || 'Failed to delete account');
+        throw new Error(res.error || 'Failed to delete Flexer data');
       }
+        serverDeleted = true;
 
       // Clear any local storage data
-      localStorage.removeItem('flexer_progress');
-      localStorage.removeItem('flexer_theme');
+        await prepareSignout(true);
+      if (userId) clearAccountStorage(localStorage, userId, ownedLegacy);
 
       // Sign out and redirect
       await signOut();
       navigate('/sign-in');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete account');
+        setError(serverDeleted ? 'Your Flexer server data was deleted, but device cleanup or signout failed. Private running data remains paused. Retry signout to finish device cleanup.' : err instanceof Error ? err.message : 'Failed to delete Flexer data');
       setDeleting(false);
     }
   }
@@ -179,6 +201,10 @@ export function ProfilePage() {
     );
   }
 
+  if (!profileLoaded) {
+    return <ResponsiveLayout><div className="profile-page"><h1>Profile settings</h1><p role="alert">{error || 'Your profile could not be loaded.'} Your saved profile has not been changed.</p><button className="btn btn-primary" onClick={() => { void loadProfile(); }}>Retry loading profile</button></div></ResponsiveLayout>;
+  }
+
   return (
     <ResponsiveLayout>
       <div className="profile-page">
@@ -189,9 +215,9 @@ export function ProfilePage() {
           <h1>Profile Settings</h1>
         </header>
 
-      <main className="profile-content">
-        {error && <div className="error-banner">{error}</div>}
-        {success && <div className="success-banner">Profile saved successfully!</div>}
+      <section className="profile-content" aria-label="Profile preferences">
+        {error && <div className="error-banner" role="alert">{error}</div>}
+        {success && <div className="success-banner" role="status">Profile saved successfully!</div>}
 
         <section className="profile-section">
           <h2>Personal Info</h2>
@@ -200,7 +226,7 @@ export function ProfilePage() {
             <label>Age</label>
             <input
               type="number"
-              value={age || ''}
+              aria-label="Age" value={age || ''}
               onChange={e => setAge(parseInt(e.target.value) || undefined)}
               placeholder="30"
               min="13"
@@ -231,7 +257,7 @@ export function ProfilePage() {
                   <div className="height-field">
                     <input
                       type="number"
-                      value={localFeet}
+                      aria-label="Height in feet" value={localFeet}
                       onChange={e => setLocalFeet(e.target.value)}
                       placeholder="5"
                       min="3"
@@ -242,7 +268,7 @@ export function ProfilePage() {
                   <div className="height-field">
                     <input
                       type="number"
-                      value={localInches}
+                      aria-label="Additional height in inches" value={localInches}
                       onChange={e => setLocalInches(e.target.value)}
                       placeholder="10"
                       min="0"
@@ -256,7 +282,7 @@ export function ProfilePage() {
                 <label>Weight (lbs)</label>
                 <input
                   type="number"
-                  value={localLbs}
+                  aria-label="Weight in pounds" value={localLbs}
                   onChange={e => setLocalLbs(e.target.value)}
                   placeholder="160"
                   min="50"
@@ -270,7 +296,7 @@ export function ProfilePage() {
                 <label>Height (cm)</label>
                 <input
                   type="number"
-                  value={heightCm || ''}
+                  aria-label="Height in centimetres" value={heightCm || ''}
                   onChange={e => setHeightCm(parseInt(e.target.value) || undefined)}
                   placeholder="175"
                 />
@@ -279,7 +305,7 @@ export function ProfilePage() {
                 <label>Weight (kg)</label>
                 <input
                   type="number"
-                  value={weightKg || ''}
+                  aria-label="Weight in kilograms" value={weightKg || ''}
                   onChange={e => setWeightKg(parseInt(e.target.value) || undefined)}
                   placeholder="70"
                 />
@@ -361,18 +387,18 @@ export function ProfilePage() {
           </button>
 
           <div className="delete-account-section">
-            <h3>Delete Account</h3>
+            <h3>Delete Flexer Data</h3>
             {!showDeleteConfirm ? (
               <>
                 <p className="delete-warning">
-                  Permanently delete your account and all associated data including your personal details,
+                  Permanently delete your Flexer profile, plans and recorded data including your personal details,
                   workout history, and any health information you've provided.
                 </p>
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
                   className="btn btn-danger"
                 >
-                  Delete My Account
+                  Delete My Flexer Data
                 </button>
               </>
             ) : (
@@ -384,17 +410,17 @@ export function ProfilePage() {
                   <li>Your personal details (age, height, weight)</li>
                   <li>Health and injury information</li>
                   <li>All workout plans and history</li>
-                  <li>Your account and profile</li>
+                  <li>Your Flexer profile</li>
                 </ul>
                 <p className="delete-confirm-note">
-                  We will not retain any of this information. You're welcome to sign up again anytime.
+                  Your Clerk sign-in identity is retained. You will be signed out and can sign in again to create a new Flexer profile.
                 </p>
                 <p className="delete-confirm-instruction">
                   Type <strong>DELETE</strong> to confirm:
                 </p>
                 <input
                   type="text"
-                  value={deleteConfirmText}
+                  aria-label="Type DELETE to confirm deleting Flexer data" value={deleteConfirmText}
                   onChange={e => setDeleteConfirmText(e.target.value.toUpperCase())}
                   placeholder="DELETE"
                   className="delete-confirm-input"
@@ -423,7 +449,7 @@ export function ProfilePage() {
             )}
           </div>
         </section>
-      </main>
+      </section>
       </div>
     </ResponsiveLayout>
   );

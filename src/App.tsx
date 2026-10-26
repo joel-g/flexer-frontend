@@ -1,3 +1,6 @@
+import { useEffect, useState, type ReactNode } from 'react';
+import { useAuth } from '@clerk/clerk-react';
+import { api } from './services/api';
 import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
@@ -11,8 +14,25 @@ import { HistoryPage } from './pages/HistoryPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import './App.css';
+import './production.css';
+import { RunningProvider } from './running/RunningContext';
+import { RunningPage } from './running/RunningPage';
 
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+// Do not mount any data-fetching page until its token getter is installed.
+function ApiAuthBoundary({ children }: { children: ReactNode }) {
+  const { isLoaded, userId, getToken } = useAuth();
+  const [readyUser, setReadyUser] = useState<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (!isLoaded) return;
+    api.setTokenGetter(userId ? getToken : null);
+    setReadyUser(userId);
+    return () => api.setTokenGetter(null);
+  }, [isLoaded, userId, getToken]);
+  if (!isLoaded || readyUser !== userId) return <p role="status">Loading your account...</p>;
+  return <div key={userId ?? 'signed-out'}>{children}</div>;
+}
 
 // Protected route wrapper
 function ProtectedRoute() {
@@ -55,6 +75,7 @@ function AppRoutes() {
         <Route path="/plan" element={<PlanOverviewPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/history" element={<HistoryPage />} />
+        <Route path="/running" element={<RunningPage />} />
       </Route>
 
       {/* Catch-all redirect */}
@@ -79,7 +100,7 @@ function App() {
     <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
       <ThemeProvider>
         <BrowserRouter>
-          <AppRoutes />
+          <ApiAuthBoundary><RunningProvider><AppRoutes /></RunningProvider></ApiAuthBoundary>
         </BrowserRouter>
       </ThemeProvider>
     </ClerkProvider>

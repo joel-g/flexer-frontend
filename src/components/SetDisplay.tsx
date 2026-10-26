@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { Exercise, WeightUnit, ExerciseLoadType } from '../types/workout';
 
 export interface SetCompletionData {
@@ -15,7 +15,7 @@ interface SetDisplayProps {
   exercise: Exercise;
   setNumber: number;
   totalSets: number;
-  onComplete: (data: SetCompletionData) => void;
+  onComplete: (data: SetCompletionData) => void | Promise<void>;
   onBack?: () => void;
 }
 
@@ -27,6 +27,9 @@ export const SetDisplay: React.FC<SetDisplayProps> = ({
   onBack
 }) => {
   const [isCompleted, setIsCompleted] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const exerciseHeading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { exerciseHeading.current?.focus(); }, [exercise.id, setNumber]);
 
   // Parse target reps and weight for defaults
   const parseTargetReps = (): number | undefined => {
@@ -126,12 +129,18 @@ export const SetDisplay: React.FC<SetDisplayProps> = ({
     setActualDistance(targetDistance.value?.toString() || '');
     setDistanceUnit(targetDistance.unit);
     setIsCompleted(false);
+    setSaveError(null);
   }, [exercise.id, setNumber]);
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    const numericValues = [showRepsInput ? actualReps : '', showWeightInput ? actualWeight : '', showDurationInput ? actualDuration : '', showDistanceInput ? actualDistance : ''];
+    if (numericValues.some(value => value !== '' && (!Number.isFinite(Number(value)) || Number(value) < 0)) || (showRepsInput && actualReps !== '' && !Number.isInteger(Number(actualReps))) || (showDurationInput && actualDuration !== '' && !Number.isInteger(Number(actualDuration)))) {
+      setSaveError('Use zero or positive values. Repetitions and seconds must be whole numbers.');
+      return;
+    }
     setIsCompleted(true);
-    // Small delay to show completion state before moving on
-    setTimeout(() => {
+    setSaveError(null);
+    try {
       const data: SetCompletionData = {};
 
       // Reps-based exercises
@@ -161,12 +170,16 @@ export const SetDisplay: React.FC<SetDisplayProps> = ({
         data.actualDistanceUnit = distanceUnit;
       }
 
-      onComplete(data);
-    }, 500);
+      await onComplete(data);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Set could not be saved. Please retry.');
+      setIsCompleted(false);
+    }
   };
 
   return (
     <div className="set-display">
+      {saveError && <p role="alert">{saveError}</p>}
       {/* Progress indicator */}
       <div className="set-progress-indicator">
         <div className="set-progress-text">
@@ -183,7 +196,7 @@ export const SetDisplay: React.FC<SetDisplayProps> = ({
       {/* Exercise card */}
       <div className={`exercise-set-card ${isCompleted ? 'completed' : ''}`}>
         <div className="exercise-header">
-          <h2 className="exercise-name">{exercise.name}</h2>
+          <h2 className="exercise-name" ref={exerciseHeading} tabIndex={-1}>{exercise.name}</h2>
           <div className="set-indicator">
             Set {setNumber} of {exercise.sets}
           </div>
@@ -290,6 +303,7 @@ export const SetDisplay: React.FC<SetDisplayProps> = ({
                     disabled={isCompleted}
                   />
                   <select
+                    aria-label="Weight unit"
                     value={weightUnit}
                     onChange={(e) => setWeightUnit(e.target.value as WeightUnit)}
                     disabled={isCompleted}
@@ -365,6 +379,7 @@ export const SetDisplay: React.FC<SetDisplayProps> = ({
                     disabled={isCompleted}
                   />
                   <select
+                    aria-label="Distance unit"
                     value={distanceUnit}
                     onChange={(e) => setDistanceUnit(e.target.value as 'mi' | 'km' | 'm')}
                     disabled={isCompleted}
@@ -381,14 +396,14 @@ export const SetDisplay: React.FC<SetDisplayProps> = ({
 
         {exercise.instructions && (
           <div className="exercise-instructions-box">
-            <h4>How to perform:</h4>
+            <h3>How to perform</h3>
             <p>{exercise.instructions}</p>
           </div>
         )}
 
         {exercise.notes && (
           <div className="exercise-notes-box">
-            <h4>Notes:</h4>
+            <h3>Notes</h3>
             <p>{exercise.notes}</p>
           </div>
         )}

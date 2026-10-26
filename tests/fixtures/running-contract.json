@@ -1,0 +1,715 @@
+{
+  "metadata": {
+    "syntheticOnly": true,
+    "contractVersion": 1
+  },
+  "headers": {
+    "Authorization": "Bearer SYNTHETIC_TEST_TOKEN_NOT_A_CREDENTIAL",
+    "X-Account-Incarnation": "10000000-0000-4000-8000-000000000001",
+    "X-Operation-Id": "20000000-0000-4000-8000-000000000001",
+    "If-Match": "\"3\"",
+    "Content-Type": "text/plain; charset=utf-8"
+  },
+  "intake": {
+    "goalText": "Build a consistent running habit",
+    "objective": "build_base",
+    "raceChoice": null,
+    "start": "2026-10-21",
+    "end": "2026-11-01",
+    "raceDate": null,
+    "timeZone": "America/New_York",
+    "distanceUnit": "mi",
+    "recentVolume": {
+      "distance": {
+        "value": 0,
+        "unit": "mi"
+      },
+      "periodStart": "2026-10-07",
+      "periodEnd": "2026-10-20"
+    },
+    "lastFourWeeklyTotals": null,
+    "runsPerWeek": null,
+    "longestRun": null,
+    "raceHistory": [],
+    "interruptions": null,
+    "limitations": null,
+    "availableDays": [
+      "tuesday",
+      "thursday",
+      "sunday"
+    ],
+    "longRunDay": "sunday",
+    "availableMinutesPerRun": 45,
+    "liftingDays": [
+      "monday",
+      "friday"
+    ],
+    "liftingPriority": "balanced",
+    "liftingContextConfirmed": true
+  },
+  "syntheticMarathonIntake": {
+    "goalText": "first marathon in 8 weeks, currently 3 miles/week, 11 half marathons in 2 years",
+    "objective": "finish_race",
+    "raceChoice": "marathon",
+    "start": "2026-10-26",
+    "end": "2026-12-20",
+    "raceDate": "2026-12-20",
+    "timeZone": "America/Los_Angeles",
+    "distanceUnit": "mi",
+    "recentVolume": {
+      "distance": {
+        "value": 3,
+        "unit": "mi"
+      },
+      "periodStart": "2026-10-19",
+      "periodEnd": "2026-10-25"
+    },
+    "lastFourWeeklyTotals": null,
+    "runsPerWeek": null,
+    "longestRun": null,
+    "raceHistory": [
+      {
+        "raceChoice": "half_marathon",
+        "count": 11,
+        "periodMonths": 24,
+        "date": null,
+        "durationSeconds": null,
+        "notes": "Synthetic aggregate history; individual dates unknown"
+      }
+    ],
+    "interruptions": null,
+    "limitations": null,
+    "availableDays": null,
+    "longRunDay": null,
+    "availableMinutesPerRun": null,
+    "liftingDays": null,
+    "liftingPriority": null,
+    "liftingContextConfirmed": true
+  },
+  "import": {
+    "schemaVersion": 1,
+    "name": "Synthetic base plan",
+    "requestedGoal": "Build a consistent running habit",
+    "planGoal": "Build a consistent running habit",
+    "rationale": "Unverified model text used only as a fixture.",
+    "assumptions": [
+      "Availability was supplied manually"
+    ],
+    "cautions": [
+      "Flexer validates structure, not training suitability"
+    ],
+    "start": "2026-10-21",
+    "end": "2026-11-01",
+    "raceDate": null,
+    "weeks": [
+      {
+        "start": "2026-10-19",
+        "focus": "Synthetic",
+        "notes": "Partial boundary week",
+        "runs": [
+          {
+            "date": "2026-10-22",
+            "type": "easy",
+            "title": "Distance fixture",
+            "target": {
+              "kind": "distance",
+              "value": 1,
+              "unit": "mi"
+            },
+            "effort": "Conversational",
+            "paceRange": null,
+            "notes": ""
+          },
+          {
+            "date": "2026-10-25",
+            "type": "run_walk",
+            "title": "Duration fixture",
+            "target": {
+              "kind": "duration",
+              "value": 20,
+              "unit": "minutes"
+            },
+            "effort": "Comfortable"
+          }
+        ]
+      },
+      {
+        "start": "2026-10-26",
+        "focus": "Rest-only week fixture",
+        "notes": "",
+        "runs": []
+      }
+    ]
+  },
+  "normalizedTargets": [
+    {
+      "kind": "distance",
+      "meters": 1609.344,
+      "seconds": null
+    },
+    {
+      "kind": "duration",
+      "meters": null,
+      "seconds": 1200
+    }
+  ],
+  "draftCreate": {
+    "intake": {
+      "goalText": "Build a consistent running habit",
+      "objective": "build_base",
+      "raceChoice": null,
+      "start": "2026-10-21",
+      "end": "2026-11-01",
+      "raceDate": null,
+      "timeZone": "America/New_York",
+      "distanceUnit": "mi",
+      "recentVolume": {
+        "distance": {
+          "value": 0,
+          "unit": "mi"
+        },
+        "periodStart": "2026-10-07",
+        "periodEnd": "2026-10-20"
+      },
+      "lastFourWeeklyTotals": null,
+      "runsPerWeek": null,
+      "longestRun": null,
+      "raceHistory": [],
+      "interruptions": null,
+      "limitations": null,
+      "availableDays": [
+        "tuesday",
+        "thursday",
+        "sunday"
+      ],
+      "longRunDay": "sunday",
+      "availableMinutesPerRun": 45,
+      "liftingDays": [
+        "monday",
+        "friday"
+      ],
+      "liftingPriority": "balanced",
+      "liftingContextConfirmed": true
+    }
+  },
+  "activation": {
+    "expectedRevision": 3,
+    "importVersion": 2,
+    "expectedGeneration": 0,
+    "expectedActivePlanId": null,
+    "previewAcceptanceToken": "60000000-0000-4000-8000-000000000001"
+  },
+  "resultDistanceOnly": {
+    "mutationId": "30000000-0000-4000-8000-000000000001",
+    "expectedRevision": 0,
+    "status": "completed",
+    "actualDate": "2026-10-22",
+    "actualDistance": {
+      "value": 1.5,
+      "unit": "mi"
+    },
+    "durationSeconds": null,
+    "paceSecondsPerKm": null,
+    "effortRpe": 6,
+    "notes": "Synthetic note"
+  },
+  "resultPace": {
+    "mutationId": "30000000-0000-4000-8000-000000000002",
+    "expectedRevision": 1,
+    "status": "completed",
+    "actualDate": "2026-10-22",
+    "actualDistance": {
+      "value": 5,
+      "unit": "km"
+    },
+    "durationSeconds": null,
+    "paceSecondsPerKm": 360,
+    "effortRpe": null,
+    "notes": null
+  },
+  "resultUndo": {
+    "mutationId": "30000000-0000-4000-8000-000000000003",
+    "expectedRevision": 2,
+    "status": "pending",
+    "actualDate": null,
+    "actualDistance": null,
+    "durationSeconds": null,
+    "paceSecondsPerKm": null,
+    "effortRpe": null,
+    "notes": null
+  },
+  "resultSkipped": {
+    "mutationId": "30000000-0000-4000-8000-000000000004",
+    "expectedRevision": 3,
+    "status": "skipped",
+    "actualDate": null,
+    "actualDistance": null,
+    "durationSeconds": null,
+    "paceSecondsPerKm": null,
+    "effortRpe": null,
+    "notes": "Synthetic schedule conflict"
+  },
+  "schedule": {
+    "mutationId": "30000000-0000-4000-8000-000000000005",
+    "expectedRevision": 4,
+    "date": "2026-10-24"
+  },
+  "canonicalRun": {
+    "id": "40000000-0000-4000-8000-000000000001",
+    "planId": "50000000-0000-4000-8000-000000000001",
+    "originalDate": "2026-10-22",
+    "scheduledDate": "2026-10-24",
+    "revision": 5,
+    "status": "completed",
+    "actualDate": "2026-10-22",
+    "actualMeters": 5000,
+    "durationSeconds": 1800,
+    "durationSource": "derived_from_pace",
+    "effortRpe": null,
+    "notes": null
+  },
+  "responses": {
+    "disabled": {
+      "success": false,
+      "error": "Running is currently unavailable.",
+      "code": "FEATURE_DISABLED",
+      "requestId": "synthetic-request-1"
+    },
+    "notFound": {
+      "success": false,
+      "error": "Not found.",
+      "code": "NOT_FOUND",
+      "requestId": "synthetic-request-2"
+    },
+    "validation": {
+      "success": false,
+      "error": "Correct the indicated fields.",
+      "code": "VALIDATION_FAILED",
+      "fieldErrors": [
+        {
+          "path": "/weeks/0/runs/0/target/value",
+          "code": "POSITIVE_NUMBER_REQUIRED",
+          "message": "Enter a finite positive number."
+        }
+      ],
+      "requestId": "synthetic-request-3"
+    },
+    "conflict": {
+      "success": false,
+      "error": "This run changed. Review the current version.",
+      "code": "REVISION_CONFLICT",
+      "current": {
+        "run": {
+          "id": "40000000-0000-4000-8000-000000000001",
+          "planId": "50000000-0000-4000-8000-000000000001",
+          "originalDate": "2026-10-22",
+          "scheduledDate": "2026-10-24",
+          "revision": 5,
+          "status": "completed",
+          "actualDate": "2026-10-22",
+          "actualMeters": 5000,
+          "durationSeconds": 1800,
+          "durationSource": "derived_from_pace",
+          "effortRpe": null,
+          "notes": null
+        }
+      },
+      "requestId": "synthetic-request-4"
+    },
+    "featureState": {
+      "success": true,
+      "data": {
+        "enabled": false,
+        "code": "FEATURE_DISABLED"
+      }
+    }
+  },
+  "bootstrap": {},
+  "preferences": {
+    "expectedRevision": 0,
+    "preferredUnits": "mi"
+  },
+  "activePlan": {
+    "id": "50000000-0000-4000-8000-000000000001",
+    "revision": 4,
+    "lifecycle": "active",
+    "timeZone": "America/New_York",
+    "intake": {
+      "goalText": "Build a consistent running habit",
+      "objective": "build_base",
+      "raceChoice": null,
+      "start": "2026-10-21",
+      "end": "2026-11-01",
+      "raceDate": null,
+      "timeZone": "America/New_York",
+      "distanceUnit": "mi",
+      "recentVolume": {
+        "distance": {
+          "value": 0,
+          "unit": "mi"
+        },
+        "periodStart": "2026-10-07",
+        "periodEnd": "2026-10-20"
+      },
+      "lastFourWeeklyTotals": null,
+      "runsPerWeek": null,
+      "longestRun": null,
+      "raceHistory": [],
+      "interruptions": null,
+      "limitations": null,
+      "availableDays": [
+        "tuesday",
+        "thursday",
+        "sunday"
+      ],
+      "longRunDay": "sunday",
+      "availableMinutesPerRun": 45,
+      "liftingDays": [
+        "monday",
+        "friday"
+      ],
+      "liftingPriority": "balanced",
+      "liftingContextConfirmed": true
+    },
+    "latestImportVersion": 2,
+    "activatedVersion": 2,
+    "everActivated": true,
+    "preview": null,
+    "program": {
+      "importVersion": 2,
+      "name": "Synthetic base plan",
+      "requestedGoal": "Build a consistent running habit",
+      "planGoal": "Build a consistent running habit",
+      "rationale": "Unverified model text used only as a fixture.",
+      "assumptions": [
+        "Availability was supplied manually"
+      ],
+      "cautions": [
+        "Flexer validates structure, not training suitability"
+      ],
+      "start": "2026-10-21",
+      "end": "2026-11-01",
+      "raceDate": null,
+      "weeks": [
+        {
+          "id": "70000000-0000-4000-8000-000000000001",
+          "start": "2026-10-19",
+          "focus": "Synthetic",
+          "notes": "Partial boundary week",
+          "runs": [
+            {
+              "id": "40000000-0000-4000-8000-000000000001",
+              "weekId": "70000000-0000-4000-8000-000000000001",
+              "originalDate": "2026-10-22",
+              "type": "easy",
+              "title": "Distance fixture",
+              "target": {
+                "kind": "distance",
+                "meters": 1609.344,
+                "seconds": null
+              },
+              "effort": "Conversational",
+              "paceRange": null,
+              "notes": "",
+              "result": {
+                "id": "40000000-0000-4000-8000-000000000001",
+                "planId": "50000000-0000-4000-8000-000000000001",
+                "originalDate": "2026-10-22",
+                "scheduledDate": "2026-10-24",
+                "revision": 5,
+                "status": "completed",
+                "actualDate": "2026-10-22",
+                "actualMeters": 5000,
+                "durationSeconds": 1800,
+                "durationSource": "derived_from_pace",
+                "effortRpe": null,
+                "notes": null
+              }
+            },
+            {
+              "id": "40000000-0000-4000-8000-000000000002",
+              "weekId": "70000000-0000-4000-8000-000000000001",
+              "originalDate": "2026-10-25",
+              "type": "run_walk",
+              "title": "Duration fixture",
+              "target": {
+                "kind": "duration",
+                "meters": null,
+                "seconds": 1200
+              },
+              "effort": "Comfortable",
+              "paceRange": null,
+              "notes": "",
+              "result": {
+                "id": "40000000-0000-4000-8000-000000000002",
+                "planId": "50000000-0000-4000-8000-000000000001",
+                "originalDate": "2026-10-25",
+                "scheduledDate": "2026-10-25",
+                "revision": 0,
+                "status": "pending",
+                "actualDate": null,
+                "actualMeters": null,
+                "durationSeconds": null,
+                "durationSource": null,
+                "effortRpe": null,
+                "notes": null
+              }
+            }
+          ]
+        },
+        {
+          "id": "70000000-0000-4000-8000-000000000002",
+          "start": "2026-10-26",
+          "focus": "Rest-only week fixture",
+          "notes": "",
+          "runs": []
+        }
+      ]
+    }
+  },
+  "archivedPlan": {
+    "id": "50000000-0000-4000-8000-000000000001",
+    "revision": 5,
+    "lifecycle": "archived",
+    "timeZone": "America/New_York",
+    "intake": {
+      "goalText": "Build a consistent running habit",
+      "objective": "build_base",
+      "raceChoice": null,
+      "start": "2026-10-21",
+      "end": "2026-11-01",
+      "raceDate": null,
+      "timeZone": "America/New_York",
+      "distanceUnit": "mi",
+      "recentVolume": {
+        "distance": {
+          "value": 0,
+          "unit": "mi"
+        },
+        "periodStart": "2026-10-07",
+        "periodEnd": "2026-10-20"
+      },
+      "lastFourWeeklyTotals": null,
+      "runsPerWeek": null,
+      "longestRun": null,
+      "raceHistory": [],
+      "interruptions": null,
+      "limitations": null,
+      "availableDays": [
+        "tuesday",
+        "thursday",
+        "sunday"
+      ],
+      "longRunDay": "sunday",
+      "availableMinutesPerRun": 45,
+      "liftingDays": [
+        "monday",
+        "friday"
+      ],
+      "liftingPriority": "balanced",
+      "liftingContextConfirmed": true
+    },
+    "latestImportVersion": 2,
+    "activatedVersion": 2,
+    "everActivated": true,
+    "preview": null,
+    "program": {
+      "importVersion": 2,
+      "name": "Synthetic base plan",
+      "requestedGoal": "Build a consistent running habit",
+      "planGoal": "Build a consistent running habit",
+      "rationale": "Unverified model text used only as a fixture.",
+      "assumptions": [
+        "Availability was supplied manually"
+      ],
+      "cautions": [
+        "Flexer validates structure, not training suitability"
+      ],
+      "start": "2026-10-21",
+      "end": "2026-11-01",
+      "raceDate": null,
+      "weeks": [
+        {
+          "id": "70000000-0000-4000-8000-000000000001",
+          "start": "2026-10-19",
+          "focus": "Synthetic",
+          "notes": "Partial boundary week",
+          "runs": [
+            {
+              "id": "40000000-0000-4000-8000-000000000001",
+              "weekId": "70000000-0000-4000-8000-000000000001",
+              "originalDate": "2026-10-22",
+              "type": "easy",
+              "title": "Distance fixture",
+              "target": {
+                "kind": "distance",
+                "meters": 1609.344,
+                "seconds": null
+              },
+              "effort": "Conversational",
+              "paceRange": null,
+              "notes": "",
+              "result": {
+                "id": "40000000-0000-4000-8000-000000000001",
+                "planId": "50000000-0000-4000-8000-000000000001",
+                "originalDate": "2026-10-22",
+                "scheduledDate": "2026-10-24",
+                "revision": 6,
+                "status": "completed",
+                "actualDate": "2026-10-20",
+                "actualMeters": 5000,
+                "durationSeconds": 1800,
+                "durationSource": "derived_from_pace",
+                "effortRpe": null,
+                "notes": null
+              }
+            },
+            {
+              "id": "40000000-0000-4000-8000-000000000002",
+              "weekId": "70000000-0000-4000-8000-000000000001",
+              "originalDate": "2026-10-25",
+              "type": "run_walk",
+              "title": "Duration fixture",
+              "target": {
+                "kind": "duration",
+                "meters": null,
+                "seconds": 1200
+              },
+              "effort": "Comfortable",
+              "paceRange": null,
+              "notes": "",
+              "result": {
+                "id": "40000000-0000-4000-8000-000000000002",
+                "planId": "50000000-0000-4000-8000-000000000001",
+                "originalDate": "2026-10-25",
+                "scheduledDate": "2026-10-25",
+                "revision": 0,
+                "status": "pending",
+                "actualDate": null,
+                "actualMeters": null,
+                "durationSeconds": null,
+                "durationSource": null,
+                "effortRpe": null,
+                "notes": null
+              }
+            }
+          ]
+        },
+        {
+          "id": "70000000-0000-4000-8000-000000000002",
+          "start": "2026-10-26",
+          "focus": "Rest-only week fixture",
+          "notes": "",
+          "runs": []
+        }
+      ]
+    }
+  },
+  "draftPlan": {
+    "id": "50000000-0000-4000-8000-000000000001",
+    "revision": 3,
+    "lifecycle": "draft",
+    "timeZone": "America/New_York",
+    "intake": {
+      "goalText": "Build a consistent running habit",
+      "objective": "build_base",
+      "raceChoice": null,
+      "start": "2026-10-21",
+      "end": "2026-11-01",
+      "raceDate": null,
+      "timeZone": "America/New_York",
+      "distanceUnit": "mi",
+      "recentVolume": {
+        "distance": {
+          "value": 0,
+          "unit": "mi"
+        },
+        "periodStart": "2026-10-07",
+        "periodEnd": "2026-10-20"
+      },
+      "lastFourWeeklyTotals": null,
+      "runsPerWeek": null,
+      "longestRun": null,
+      "raceHistory": [],
+      "interruptions": null,
+      "limitations": null,
+      "availableDays": [
+        "tuesday",
+        "thursday",
+        "sunday"
+      ],
+      "longRunDay": "sunday",
+      "availableMinutesPerRun": 45,
+      "liftingDays": [
+        "monday",
+        "friday"
+      ],
+      "liftingPriority": "balanced",
+      "liftingContextConfirmed": true
+    },
+    "latestImportVersion": 2,
+    "activatedVersion": null,
+    "everActivated": false,
+    "program": null,
+    "preview": {
+      "importVersion": 2,
+      "plan": {
+        "schemaVersion": 1,
+        "name": "Synthetic base plan",
+        "requestedGoal": "Build a consistent running habit",
+        "planGoal": "Build a consistent running habit",
+        "rationale": "Unverified model text used only as a fixture.",
+        "assumptions": [
+          "Availability was supplied manually"
+        ],
+        "cautions": [
+          "Flexer validates structure, not training suitability"
+        ],
+        "start": "2026-10-21",
+        "end": "2026-11-01",
+        "raceDate": null,
+        "weeks": [
+          {
+            "start": "2026-10-19",
+            "focus": "Synthetic",
+            "notes": "Partial boundary week",
+            "runs": [
+              {
+                "date": "2026-10-22",
+                "type": "easy",
+                "title": "Distance fixture",
+                "target": {
+                  "kind": "distance",
+                  "value": 1,
+                  "unit": "mi"
+                },
+                "effort": "Conversational",
+                "paceRange": null,
+                "notes": ""
+              },
+              {
+                "date": "2026-10-25",
+                "type": "run_walk",
+                "title": "Duration fixture",
+                "target": {
+                  "kind": "duration",
+                  "value": 20,
+                  "unit": "minutes"
+                },
+                "effort": "Comfortable"
+              }
+            ]
+          },
+          {
+            "start": "2026-10-26",
+            "focus": "Rest-only week fixture",
+            "notes": "",
+            "runs": []
+          }
+        ]
+      },
+      "previewAcceptanceToken": "60000000-0000-4000-8000-000000000001",
+      "differences": []
+    }
+  }
+}
